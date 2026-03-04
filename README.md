@@ -1,20 +1,88 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🎮 Play-AI: The Ultimate AI Gaming Hub
 
-# Run and deploy your AI Studio app
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Host: play-ai.in](https://img.shields.io/badge/Hosted-play--ai.in-indigo)](https://play-ai.in)
 
-This contains everything you need to run your app locally.
+Play-AI is a high-performance, open-source gaming platform featuring 50+ classic and modern games powered by Multiple Large Language Models (LLMs). Challenge the AI, watch LLMs duel each other, or sharpen your skills in an immersive, gaming-optimized environment.
 
-View your app in AI Studio: https://ai.studio/apps/f9cc11af-39ad-4c15-adc5-9f44f3f4b2c8
+**🌐 Live Demo:** [play-ai.in](https://play-ai.in)
 
-## Run Locally
+---
 
-**Prerequisites:**  Node.js
+## ✨ Features
 
+- **50+ Integrated Games:** From classics like Chess and Sudoku to AI-driven experiences like Story Teller and ML Tuning.
+- **Multiple AI Engines:** Integrated support for:
+  - **Google Gemini** (v1.5 Flash/Pro)
+  - **OpenAI GPT-4o**
+  - **Anthropic Claude 3.5**
+  - **DeepSeek**
+  - **Groq** (Ultra-fast Llama 3/Mixtral)
+  - **Ollama** (Local execution support)
+- **Duel Mode:** Match two different LLMs against each other and watch them compete.
+- **Premium UI:** Sleek, dark-themed interface built with React, Tailwind, and Framer Motion.
+- **Infrastructure Ready:** Full-stack architecture with high-speed inference logging and quota management.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+---
+
+## 🛠️ Local Development
+
+### Prerequisites
+- **Node.js** (v20+)
+- **PostgreSQL** (Optional for local development, fallback to transient state available)
+
+### Quick Start
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/Play-AI.git
+   cd Play-AI
+   ```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+3. **Configure Environment:**
+   Create a `.env` file in the root:
+   ```env
+   DATABASE_URL=postgres://user:pass@localhost:5432/play-ai
+   JWT_SECRET=your_super_secret_key
+   ```
+4. **Launch:**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 🐳 Docker Deployment (Recommended for Droplets)
+
+To host on a DigitalOcean Droplet or any VPS:
+
+1. **Install Docker & Docker Compose on your Droplet.**
+2. **Clone the repo on the server:**
+   ```bash
+   git clone https://github.com/your-username/Play-AI.git
+   cd Play-AI
+   ```
+3. **Build and Run:**
+   ```bash
+   docker compose up -d --build
+   ```
+   The app will be available on port `3000`.
+
+---
+
+## 🤝 Contributing
+
+We love PRs! Whether it's a new game, a UI tweak, or a new AI provider, feel free to contribute.
+1. Check out our [CONTRIBUTING.md](CONTRIBUTING.md).
+2. Fork the repo and submit your changes.
+3. If your PR is high-quality, it will be merged and deployed to `play-ai.in`.
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+Developed for the future of AI-human interaction.

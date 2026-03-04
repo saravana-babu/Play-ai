@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, BrainCircuit, HelpCircle, Send, Timer } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 export default function Boggle() {
   const [grid, setGrid] = useState<string[][]>([]);
@@ -25,7 +26,7 @@ export default function Boggle() {
       "DISTTY", "EEGHNW", "EEINSU", "EHRTVW",
       "EIOSST", "ELRTTY", "HIMNQU", "HLNNRZ"
     ];
-    
+
     const shuffledDice = [...dice].sort(() => Math.random() - 0.5);
     const newGrid: string[][] = [];
     for (let i = 0; i < 4; i++) {
@@ -67,7 +68,7 @@ export default function Boggle() {
     if (e) e.preventDefault();
     const word = currentWord.toUpperCase();
     if (word.length < 3) return;
-    
+
     if (!foundWords.has(word)) {
       setFoundWords(prev => new Set<string>(prev).add(word));
     }
@@ -77,7 +78,7 @@ export default function Boggle() {
   const handleEnd = async () => {
     setGameOver(true);
     setLoading(true);
-    
+
     try {
       const systemInstruction = `You are a Boggle Expert. 
       Given this 4x4 grid of letters, find as many valid English words (3+ letters) as possible.
@@ -216,9 +217,15 @@ export default function Boggle() {
                   </div>
                 )}
 
+                <ShareButtons
+                  gameTitle="Boggle"
+                  result={foundWords.size >= aiWords.length ? 'out-worded the AI' : 'found fewer words than the machine'}
+                  score={foundWords.size}
+                  penalty={funnyTask}
+                />
                 <button
                   onClick={generateGrid}
-                  className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition-all"
+                  className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition-all mt-4"
                 >
                   Play Again
                 </button>
@@ -233,7 +240,7 @@ export default function Boggle() {
         <div className="space-y-1">
           <p className="text-sm text-white font-bold">How to Play</p>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Find as many words as possible in the 4x4 grid. Words must be at least 3 letters long. 
+            Find as many words as possible in the 4x4 grid. Words must be at least 3 letters long.
             Letters must be adjacent (horizontal, vertical, or diagonal). You have 60 seconds!
           </p>
         </div>

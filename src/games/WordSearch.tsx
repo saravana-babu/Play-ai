@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, BrainCircuit, HelpCircle, Search } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 export default function WordSearch() {
   const [grid, setGrid] = useState<string[][]>([]);
@@ -87,11 +88,11 @@ export default function WordSearch() {
 
   const handleMouseEnter = (r: number, c: number) => {
     if (!isDragging) return;
-    
+
     const start = selectedCells[0];
     const dr = r - start.r;
     const dc = c - start.c;
-    
+
     // Only allow straight lines (horizontal, vertical, diagonal)
     if (dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc)) {
       const steps = Math.max(Math.abs(dr), Math.abs(dc));
@@ -110,7 +111,7 @@ export default function WordSearch() {
     setIsDragging(false);
     const selectedWord = selectedCells.map(cell => grid[cell.r][cell.c]).join('');
     const reversedWord = selectedWord.split('').reverse().join('');
-    
+
     if (words.includes(selectedWord) && !foundWords.has(selectedWord)) {
       setFoundWords(prev => new Set<string>(prev).add(selectedWord));
       setScore(s => s + 10);
@@ -118,9 +119,9 @@ export default function WordSearch() {
       setFoundWords(prev => new Set<string>(prev).add(reversedWord));
       setScore(s => s + 10);
     }
-    
+
     setSelectedCells([]);
-    
+
     if (foundWords.size + 1 === words.length) {
       handleEnd(true);
     }
@@ -169,7 +170,7 @@ export default function WordSearch() {
 
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 bg-slate-900 border border-white/10 rounded-[40px] p-8 shadow-2xl flex flex-col items-center">
-          <div 
+          <div
             className="grid grid-cols-10 gap-1 select-none"
             onMouseLeave={handleMouseUp}
           >
@@ -179,18 +180,17 @@ export default function WordSearch() {
                 const isFound = Array.from(foundWords).some(word => {
                   // This is a simplified check for highlighting found words
                   // In a real implementation, we'd store the coordinates of found words
-                  return false; 
+                  return false;
                 });
-                
+
                 return (
                   <div
                     key={`${r}-${c}`}
                     onMouseDown={() => handleMouseDown(r, c)}
                     onMouseEnter={() => handleMouseEnter(r, c)}
                     onMouseUp={handleMouseUp}
-                    className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg font-bold rounded-lg cursor-pointer transition-all ${
-                      isSelected ? 'bg-indigo-500 text-white scale-110 z-10' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                    }`}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg font-bold rounded-lg cursor-pointer transition-all ${isSelected ? 'bg-indigo-500 text-white scale-110 z-10' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                      }`}
                   >
                     {char}
                   </div>
@@ -206,13 +206,12 @@ export default function WordSearch() {
           </h3>
           <div className="grid grid-cols-2 gap-3">
             {words.map(word => (
-              <div 
-                key={word} 
-                className={`px-4 py-2 rounded-xl border transition-all ${
-                  foundWords.has(word) 
-                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 line-through' 
+              <div
+                key={word}
+                className={`px-4 py-2 rounded-xl border transition-all ${foundWords.has(word)
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 line-through'
                     : 'bg-slate-800 border-white/5 text-slate-400'
-                }`}
+                  }`}
               >
                 {word}
               </div>
@@ -235,9 +234,15 @@ export default function WordSearch() {
                 <p className="text-slate-400">You found all the words!</p>
               </div>
 
+              <ShareButtons
+                gameTitle="Word Search"
+                result="found all the hidden words"
+                score={score}
+                penalty={funnyTask}
+              />
               <button
                 onClick={generateWordSearch}
-                className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all"
+                className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all mt-4"
               >
                 Play Again
               </button>
@@ -251,7 +256,7 @@ export default function WordSearch() {
         <div className="space-y-1">
           <p className="text-sm text-white font-bold">How to Play</p>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Find all the words listed on the right within the grid of letters. 
+            Find all the words listed on the right within the grid of letters.
             Click and drag to select a word. Words can be horizontal, vertical, or diagonal, and can even be backwards!
           </p>
         </div>

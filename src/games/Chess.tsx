@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
-import { useStore } from '../store/useStore';
+import { useStore, LlmProvider } from '../store/useStore';
 import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, Info, BrainCircuit } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 export default function ChessGame() {
   const [game, setGame] = useState(new Chess());
@@ -14,7 +15,25 @@ export default function ChessGame() {
   const [funnyTask, setFunnyTask] = useState<string | null>(null);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [isAiThinking, setIsAiThinking] = useState(false);
-  const { apiKeys, selectedLlm, user } = useStore();
+  const { apiKeys, selectedLlm, player1Llm, gameMode, user, gameSessionTokens, resetSessionTokens } = useStore();
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (gameMode === 'llm-vs-llm' && !gameOver && !isAiThinking) {
+      if (game.turn() === 'w') {
+        makeAiMove('white', player1Llm);
+      } else {
+        makeAiMove('black', selectedLlm);
+      }
+    }
+  }, [game, gameOver, gameMode]);
 
   const makeAMove = useCallback((move: any) => {
     try {
@@ -31,8 +50,8 @@ export default function ChessGame() {
   }, [game]);
 
   const onDrop = (sourceSquare: string, targetSquare: string) => {
-    if (gameOver) return false;
-    
+    if (gameOver || gameMode === 'llm-vs-llm' || isAiThinking) return false;
+
     const move = makeAMove({
       from: sourceSquare,
       to: targetSquare,
@@ -43,7 +62,7 @@ export default function ChessGame() {
 
     // AI move after a short delay
     if (!game.isGameOver()) {
-      setTimeout(makeAiMove, 500);
+      setTimeout(() => makeAiMove('black', selectedLlm), 500);
     } else {
       handleEnd();
     }
@@ -51,9 +70,9 @@ export default function ChessGame() {
     return true;
   };
 
-  const makeAiMove = async () => {
-    if (game.isGameOver()) {
-      handleEnd();
+  const makeAiMove = async (color: 'white' | 'black', llm: LlmProvider) => {
+    if (game.isGameOver() || !apiKeys[llm] || !isMounted.current) {
+      if (game.isGameOver() && !gameOver) handleEnd();
       return;
     }
 
@@ -61,7 +80,7 @@ export default function ChessGame() {
 
     try {
       const possibleMoves = game.moves();
-      const systemInstruction = `You are a Grandmaster Chess AI playing as Black. 
+      const systemInstruction = `You are a Grandmaster Chess AI playing as ${color === 'white' ? 'White' : 'Black'}. 
       The current board state in FEN is: ${game.fen()}.
       The move history is: ${moveHistory.join(', ')}.
       The legal moves are: ${possibleMoves.join(', ')}.
@@ -71,12 +90,14 @@ export default function ChessGame() {
       Example: {"move": "Nf3"}`;
 
       const response = await generateNextMove(
-        selectedLlm,
+        llm,
         apiKeys,
         'chess',
         { fen: game.fen(), history: moveHistory },
         systemInstruction
       );
+
+      if (!isMounted.current) return;
 
       if (response && response.move && possibleMoves.includes(response.move)) {
         makeAMove(response.move);
@@ -86,43 +107,53 @@ export default function ChessGame() {
         makeAMove(possibleMoves[randomIndex]);
       }
     } catch (error) {
+      if (!isMounted.current) return;
       console.error('AI Move Error:', error);
       const possibleMoves = game.moves();
       const randomIndex = Math.floor(Math.random() * possibleMoves.length);
       makeAMove(possibleMoves[randomIndex]);
     } finally {
-      setIsAiThinking(false);
-      if (game.isGameOver()) {
-        handleEnd();
+      if (isMounted.current) {
+        setIsAiThinking(false);
+        if (game.isGameOver()) {
+          handleEnd();
+        }
       }
     }
   };
 
   const handleEnd = async () => {
+    if (!isMounted.current) return;
     setGameOver(true);
     let result: 'white' | 'black' | 'draw' | null = null;
-    
+
     if (game.isCheckmate()) {
       result = game.turn() === 'w' ? 'black' : 'white';
     } else if (game.isDraw() || game.isStalemate() || game.isThreefoldRepetition()) {
       result = 'draw';
     }
-    
+
     setWinner(result);
 
     let task = null;
-    if (result === 'black' && apiKeys[selectedLlm]) {
+    if (result === 'black' && apiKeys[selectedLlm] && gameMode !== 'llm-vs-llm') {
       task = await generateFunnyTask(selectedLlm, apiKeys, 'Chess');
-      setFunnyTask(task);
+      if (isMounted.current) setFunnyTask(task);
     }
 
-    if (user) {
+    if (user && isMounted.current) {
+      let winnerLabel = result === 'white' ? 'user' : result === 'black' ? 'ai' : 'draw';
+      if (gameMode === 'llm-vs-llm') {
+        winnerLabel = result === 'white' ? 'ai-1' : result === 'black' ? 'ai-2' : 'draw';
+      }
+
       await fetchApi('/history', {
         method: 'POST',
         body: JSON.stringify({
           game_id: 'chess',
-          winner: result === 'white' ? 'user' : result === 'black' ? 'ai' : 'draw',
-          funny_task: task
+          winner: winnerLabel,
+          funny_task: task,
+          total_tokens: gameSessionTokens
         })
       });
     }
@@ -134,6 +165,7 @@ export default function ChessGame() {
     setWinner(null);
     setFunnyTask(null);
     setMoveHistory([]);
+    resetSessionTokens();
   };
 
   return (
@@ -143,7 +175,9 @@ export default function ChessGame() {
           <div className="flex items-center gap-3">
             <div className={`w-3 h-3 rounded-full ${game.turn() === 'w' ? 'bg-white shadow-[0_0_10px_white]' : 'bg-slate-700'}`} />
             <span className="text-white font-bold">
-              {game.turn() === 'w' ? "Your Turn (White)" : isAiThinking ? "AI is thinking..." : "AI Turn (Black)"}
+              {gameMode === 'llm-vs-llm'
+                ? (game.turn() === 'w' ? `AI 1 (${player1Llm}) Turn` : `AI 2 (${selectedLlm}) Turn`)
+                : (game.turn() === 'w' ? "Your Turn (White)" : isAiThinking ? "AI is thinking..." : "AI Turn (Black)")}
             </span>
           </div>
           <button onClick={resetGame} className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors">
@@ -152,13 +186,14 @@ export default function ChessGame() {
         </div>
 
         <div className="bg-slate-900 p-4 rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
-          <Chessboard 
+          <Chessboard
             options={{
               position: game.fen(),
-              onPieceDrop: (args) => onDrop(args.sourceSquare, args.targetSquare),
+              onPieceDrop: (args: any) => onDrop(args.sourceSquare, args.targetSquare),
               boardOrientation: "white",
               darkSquareStyle: { backgroundColor: '#1e293b' },
-              lightSquareStyle: { backgroundColor: '#334155' }
+              lightSquareStyle: { backgroundColor: '#334155' },
+              allowDragging: gameMode !== 'llm-vs-llm' && !gameOver && !isAiThinking
             }}
           />
         </div>
@@ -172,7 +207,7 @@ export default function ChessGame() {
           <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
             {moveHistory.map((move, i) => (
               <div key={i} className="bg-slate-800/50 px-3 py-1 rounded-lg text-sm text-slate-300 flex justify-between">
-                <span className="text-slate-500 font-mono text-xs">{Math.floor(i/2) + 1}{i%2 === 0 ? '.' : '...'}</span>
+                <span className="text-slate-500 font-mono text-xs">{Math.floor(i / 2) + 1}{i % 2 === 0 ? '.' : '...'}</span>
                 <span className="font-bold">{move}</span>
               </div>
             ))}
@@ -194,13 +229,13 @@ export default function ChessGame() {
                   <>
                     <Trophy className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
                     <h3 className="text-2xl font-bold text-white mb-1">Checkmate!</h3>
-                    <p className="text-slate-400 text-sm">You won against the AI.</p>
+                    <p className="text-slate-400 text-sm">{gameMode === 'llm-vs-llm' ? 'AI 1 (White) Won!' : 'You won against the AI.'}</p>
                   </>
                 ) : winner === 'black' ? (
                   <>
                     <Skull className="w-10 h-10 text-rose-400 mx-auto mb-2" />
                     <h3 className="text-2xl font-bold text-white mb-1">Checkmate!</h3>
-                    <p className="text-slate-400 text-sm">The AI got you this time.</p>
+                    <p className="text-slate-400 text-sm">{gameMode === 'llm-vs-llm' ? 'AI 2 (Black) Won!' : 'The AI got you this time.'}</p>
                   </>
                 ) : (
                   <>
@@ -217,6 +252,12 @@ export default function ChessGame() {
                   <p className="text-sm text-rose-200 italic">"{funnyTask}"</p>
                 </div>
               )}
+
+              <ShareButtons
+                gameTitle="Chess"
+                result={winner === 'white' ? 'delivered a checkmate' : winner === 'black' ? 'got checkmated by the AI' : 'forced a draw'}
+                penalty={funnyTask}
+              />
             </motion.div>
           )}
         </AnimatePresence>

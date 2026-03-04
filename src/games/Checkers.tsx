@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, Info, BrainCircuit } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type Piece = 'w' | 'b' | 'wk' | 'bk' | null;
 type Board = Piece[][];
@@ -58,8 +59,8 @@ export default function Checkers() {
     const piece = b[r][c];
     if (!piece || !piece.startsWith(player)) return moves;
 
-    const directions = piece.endsWith('k') ? [[1, 1], [1, -1], [-1, 1], [-1, -1]] : 
-                      player === 'w' ? [[-1, 1], [-1, -1]] : [[1, 1], [1, -1]];
+    const directions = piece.endsWith('k') ? [[1, 1], [1, -1], [-1, 1], [-1, -1]] :
+      player === 'w' ? [[-1, 1], [-1, -1]] : [[1, 1], [1, -1]];
 
     // Check for jumps first
     directions.forEach(([dr, dc]) => {
@@ -143,12 +144,12 @@ export default function Checkers() {
 
     try {
       // Find all valid moves for AI
-      const allMoves: {from: [number, number], to: [number, number]}[] = [];
+      const allMoves: { from: [number, number], to: [number, number] }[] = [];
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
           if (currentBoard[r][c]?.startsWith('b')) {
             const moves = getValidMoves(r, c, currentBoard, 'b');
-            moves.forEach(m => allMoves.push({from: [r, c], to: m}));
+            moves.forEach(m => allMoves.push({ from: [r, c], to: m }));
           }
         }
       }
@@ -175,8 +176,8 @@ export default function Checkers() {
 
       if (!isMounted.current) return;
 
-      const chosen = response && response.from && response.to ? response : 
-                    (allMoves.filter(m => Math.abs(m.to[0] - m.from[0]) === 2)[0] || allMoves[Math.floor(Math.random() * allMoves.length)]);
+      const chosen = response && response.from && response.to ? response :
+        (allMoves.filter(m => Math.abs(m.to[0] - m.from[0]) === 2)[0] || allMoves[Math.floor(Math.random() * allMoves.length)]);
 
       const newBoard = currentBoard.map(row => [...row]);
       const piece = newBoard[chosen.from[0]][chosen.from[1]];
@@ -190,7 +191,7 @@ export default function Checkers() {
       if (chosen.to[0] === 7 && newBoard[chosen.to[0]][chosen.to[1]] === 'b') newBoard[chosen.to[0]][chosen.to[1]] = 'bk';
 
       setBoard(newBoard);
-      
+
       if (checkWin(newBoard, 'w')) {
         handleEnd('b');
       } else {
@@ -200,12 +201,12 @@ export default function Checkers() {
       if (!isMounted.current) return;
       console.error('Checkers AI Error:', error);
       // Fallback to random move
-      const allMoves: {from: [number, number], to: [number, number]}[] = [];
+      const allMoves: { from: [number, number], to: [number, number] }[] = [];
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
           if (currentBoard[r][c]?.startsWith('b')) {
             const moves = getValidMoves(r, c, currentBoard, 'b');
-            moves.forEach(m => allMoves.push({from: [r, c], to: m}));
+            moves.forEach(m => allMoves.push({ from: [r, c], to: m }));
           }
         }
       }
@@ -282,7 +283,7 @@ export default function Checkers() {
       </div>
 
       <div className="bg-slate-900 p-4 rounded-3xl border border-white/10 shadow-2xl w-full aspect-square grid grid-cols-8 gap-1">
-        {board.map((row, r) => 
+        {board.map((row, r) =>
           row.map((cell, c) => {
             const isDark = (r + c) % 2 === 1;
             const isSelected = selected?.[0] === r && selected?.[1] === c;
@@ -346,7 +347,13 @@ export default function Checkers() {
               </div>
             )}
 
-            <button onClick={initGame} className="px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all">
+            <ShareButtons
+              gameTitle="Checkers"
+              result={winner === 'w' ? 'cleared the board' : 'got jumped by the AI'}
+              penalty={funnyTask}
+            />
+
+            <button onClick={initGame} className="px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all mt-4">
               Play Again
             </button>
           </motion.div>

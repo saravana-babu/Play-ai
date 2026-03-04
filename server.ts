@@ -14,12 +14,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const PORT = 3000;
+const PORT = parseInt(process.env.PORT || '3000');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key';
 
 // DB Setup
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/neuroplay'
+  connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/play-ai'
 });
 
 // Init DB
@@ -36,8 +36,15 @@ const initDb = async () => {
         gemini_key TEXT,
         openai_key TEXT,
         anthropic_key TEXT,
+        deepseek_key TEXT,
+        groq_key TEXT,
         selected_llm VARCHAR(50) DEFAULT 'gemini'
       );
+      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS deepseek_key TEXT;
+      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS groq_key TEXT;
+      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS provider_models JSONB DEFAULT '{}';
+      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS ollama_url TEXT DEFAULT 'http://localhost:11434';
+      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS ollama_model TEXT DEFAULT 'llama3';
       CREATE TABLE IF NOT EXISTS game_results (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id),
@@ -120,19 +127,19 @@ app.post('/api/auth/forgot-password', async (req: Request, res: Response) => {
       res.status(404).json({ error: 'User not found' });
       return;
     }
-    
+
     // Generate a temporary password
     const tempPass = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(tempPass, 10);
-    
+
     await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedPassword, user.id]);
-    
+
     // In a real app, you'd send this via email. For now, we'll return it in the response
     // so the user can see it in this demo environment.
     console.log(`Temporary password for ${lowerEmail}: ${tempPass}`);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: 'A temporary password has been generated.',
       tempPass: tempPass // Returning it for demo purposes.
     });
@@ -148,10 +155,20 @@ app.get('/api/auth/me', authenticate, (req: AuthRequest, res: Response) => {
 app.get('/api/profiles/me', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const result = await pool.query(
-      'SELECT gemini_key, openai_key, anthropic_key, selected_llm FROM profiles WHERE id = $1',
+      'SELECT gemini_key, openai_key, anthropic_key, deepseek_key, groq_key, selected_llm, provider_models, ollama_url, ollama_model FROM profiles WHERE id = $1',
       [req.user.id]
     );
-    res.json(result.rows[0] || { gemini_key: null, openai_key: null, anthropic_key: null, selected_llm: 'gemini' });
+    res.json(result.rows[0] || {
+      gemini_key: null,
+      openai_key: null,
+      anthropic_key: null,
+      deepseek_key: null,
+      groq_key: null,
+      selected_llm: 'groq',
+      provider_models: {},
+      ollama_url: 'http://localhost:11434',
+      ollama_model: 'llama3'
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -159,16 +176,31 @@ app.get('/api/profiles/me', authenticate, async (req: AuthRequest, res: Response
 
 app.post('/api/profiles/me', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { gemini_key, openai_key, anthropic_key, selected_llm } = req.body;
+    const {
+      gemini_key, openai_key, anthropic_key, deepseek_key, groq_key,
+      selected_llm, provider_models, ollama_url, ollama_model
+    } = req.body;
+
     await pool.query(
-      `INSERT INTO profiles (id, gemini_key, openai_key, anthropic_key, selected_llm) 
-       VALUES ($1, $2, $3, $4, $5) 
+      `INSERT INTO profiles (
+        id, gemini_key, openai_key, anthropic_key, deepseek_key, groq_key, 
+        selected_llm, provider_models, ollama_url, ollama_model
+      ) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
        ON CONFLICT (id) DO UPDATE SET 
        gemini_key = EXCLUDED.gemini_key, 
        openai_key = EXCLUDED.openai_key, 
        anthropic_key = EXCLUDED.anthropic_key, 
-       selected_llm = EXCLUDED.selected_llm`,
-      [req.user.id, gemini_key, openai_key, anthropic_key, selected_llm]
+       deepseek_key = EXCLUDED.deepseek_key, 
+       groq_key = EXCLUDED.groq_key, 
+       selected_llm = EXCLUDED.selected_llm,
+       provider_models = EXCLUDED.provider_models,
+       ollama_url = EXCLUDED.ollama_url,
+       ollama_model = EXCLUDED.ollama_model`,
+      [
+        req.user.id, gemini_key, openai_key, anthropic_key, deepseek_key, groq_key,
+        selected_llm, JSON.stringify(provider_models || {}), ollama_url, ollama_model
+      ]
     );
     res.json({ success: true });
   } catch (err: any) {

@@ -4,6 +4,7 @@ import { generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, Play } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 const COLORS = [
   { id: 0, color: 'bg-rose-500', active: 'bg-rose-300 shadow-[0_0_30px_rgba(244,63,94,0.6)]', sound: 261.63 }, // C4
@@ -149,13 +150,13 @@ export default function SimonSays() {
 
         <AnimatePresence>
           {sequence.length === 0 && !gameOver && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 flex items-center justify-center bg-slate-900/40 rounded-[40px] backdrop-blur-sm"
             >
-              <button 
+              <button
                 onClick={initGame}
                 className="w-20 h-20 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
               >
@@ -183,7 +184,13 @@ export default function SimonSays() {
             </div>
           )}
 
-          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-all">
+          <ShareButtons
+            gameTitle="Simon Says"
+            result={`remembered a sequence of ${score} steps`}
+            score={score}
+            penalty={funnyTask}
+          />
+          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-all mt-4">
             <RefreshCw className="w-5 h-5" /> Try Again
           </button>
         </motion.div>

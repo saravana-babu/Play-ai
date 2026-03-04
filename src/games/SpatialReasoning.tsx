@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, BrainCircuit, HelpCircle, RotateCw } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 export default function SpatialReasoning() {
   const [targetShape, setTargetShape] = useState<number[][]>([]);
@@ -22,7 +23,7 @@ export default function SpatialReasoning() {
       // Generate a random 3x3 shape
       const shape = Array(3).fill(0).map(() => Array(3).fill(0).map(() => Math.random() > 0.6 ? 1 : 0));
       if (shape.flat().every(v => v === 0)) shape[1][1] = 1; // Ensure not empty
-      
+
       setTargetShape(shape);
 
       // Rotations: 0, 90, 180, 270
@@ -41,11 +42,11 @@ export default function SpatialReasoning() {
       const r180 = rotate(r90);
       const r270 = rotate(r180);
       const rotations = [r90, r180, r270];
-      
+
       const correct = rotations[Math.floor(Math.random() * rotations.length)];
-      
+
       // Distractors: random shapes
-      const distractors = Array(3).fill(0).map(() => 
+      const distractors = Array(3).fill(0).map(() =>
         Array(3).fill(0).map(() => Math.random() > 0.6 ? 1 : 0)
       );
 
@@ -111,9 +112,9 @@ export default function SpatialReasoning() {
   const renderShape = (shape: number[][], size: 'sm' | 'lg' = 'sm') => (
     <div className={`grid grid-cols-3 gap-1 ${size === 'lg' ? 'w-32 h-32' : 'w-20 h-20'}`}>
       {shape.flat().map((cell, i) => (
-        <div 
-          key={i} 
-          className={`rounded-sm transition-all duration-500 ${cell ? 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.4)]' : 'bg-slate-800'}`} 
+        <div
+          key={i}
+          className={`rounded-sm transition-all duration-500 ${cell ? 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.4)]' : 'bg-slate-800'}`}
         />
       ))}
     </div>
@@ -163,9 +164,15 @@ export default function SpatialReasoning() {
                 </div>
               )}
 
+              <ShareButtons
+                gameTitle="Spatial Reasoning"
+                result={score >= 10 ? 'mastered 3D thinking' : 'got lost in rotation'}
+                score={score}
+                penalty={funnyTask}
+              />
               <button
                 onClick={resetGame}
-                className="px-10 py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-500/25"
+                className="px-10 py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-500/25 mt-4"
               >
                 Try Again
               </button>
@@ -208,7 +215,7 @@ export default function SpatialReasoning() {
         <div className="space-y-1">
           <p className="text-sm text-white font-bold">How to Play</p>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Examine the target shape and identify which of the four options is a 90, 180, or 270-degree rotation of it. 
+            Examine the target shape and identify which of the four options is a 90, 180, or 270-degree rotation of it.
             The other options are different shapes entirely. You have 3 lives.
           </p>
         </div>

@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, BrainCircuit, HelpCircle, User, Bot } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type Card = { rank: string; suit: string };
 const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
@@ -30,7 +31,7 @@ export default function GoFish() {
       });
     });
     const shuffled = newDeck.sort(() => Math.random() - 0.5);
-    
+
     setPlayerHand(shuffled.slice(0, 7));
     setAiHand(shuffled.slice(7, 14));
     setDeck(shuffled.slice(14));
@@ -49,7 +50,7 @@ export default function GoFish() {
   const checkBooks = (hand: Card[], setBooks: React.Dispatch<React.SetStateAction<string[]>>) => {
     const counts: Record<string, number> = {};
     hand.forEach(c => counts[c.rank] = (counts[c.rank] || 0) + 1);
-    
+
     const completedRanks = Object.keys(counts).filter(r => counts[r] === 4);
     if (completedRanks.length > 0) {
       setBooks(prev => [...prev, ...completedRanks]);
@@ -65,12 +66,12 @@ export default function GoFish() {
     if (matches.length > 0) {
       const newPlayerHand = [...playerHand, ...matches];
       const newAiHand = aiHand.filter(c => c.rank !== rank);
-      
+
       const checkedHand = checkBooks(newPlayerHand, setPlayerBooks);
       setPlayerHand(checkedHand);
       setAiHand(newAiHand);
       setMessage(`AI had ${matches.length} ${rank}${matches.length > 1 ? 's' : ''}! You get another turn.`);
-      
+
       if (checkedHand.length === 0 || newAiHand.length === 0) checkGameOver(checkedHand, newAiHand);
     } else {
       setMessage(`AI says: Go Fish!`);
@@ -106,11 +107,11 @@ export default function GoFish() {
   const makeAiMove = async () => {
     if (gameOver) return;
     setIsAiThinking(true);
-    
+
     try {
       const playerRanks = playerHand.map(c => c.rank);
       const aiRanks = Array.from(new Set(aiHand.map(c => c.rank)));
-      
+
       const systemInstruction = `You are playing Go Fish. 
       Your hand has these ranks: ${aiRanks.join(', ')}.
       Ask for a rank that you think the player might have.
@@ -125,17 +126,17 @@ export default function GoFish() {
       );
 
       const askedRank = response?.rank || aiRanks[Math.floor(Math.random() * aiRanks.length)];
-      
+
       const matches = playerHand.filter(c => c.rank === askedRank);
       if (matches.length > 0) {
         const newAiHand = [...aiHand, ...matches];
         const newPlayerHand = playerHand.filter(c => c.rank !== askedRank);
-        
+
         const checkedHand = checkBooks(newAiHand, setAiBooks);
         setAiHand(checkedHand);
         setPlayerHand(newPlayerHand);
         setMessage(`AI asked for ${askedRank} and got ${matches.length}! AI gets another turn.`);
-        
+
         if (checkedHand.length === 0 || newPlayerHand.length === 0) {
           checkGameOver(newPlayerHand, checkedHand);
         } else {
@@ -279,9 +280,16 @@ export default function GoFish() {
                   </div>
                 )}
 
+                <ShareButtons
+                  gameTitle="Go Fish"
+                  result={playerBooks.length > aiBooks.length ? 'caught all the fish' : 'got hooked by the AI'}
+                  score={`${playerBooks.length}-${aiBooks.length}`}
+                  penalty={funnyTask}
+                />
+
                 <button
                   onClick={initGame}
-                  className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all"
+                  className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all mt-4"
                 >
                   Play Again
                 </button>
@@ -296,7 +304,7 @@ export default function GoFish() {
         <div className="space-y-1">
           <p className="text-sm text-white font-bold">How to Play</p>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Click a card in your hand to ask the AI for that rank. If they have it, you get all their cards of that rank and another turn. 
+            Click a card in your hand to ask the AI for that rank. If they have it, you get all their cards of that rank and another turn.
             If not, you "Go Fish" and draw from the deck. Collect 4 of a kind to make a "book". Most books wins!
           </p>
         </div>

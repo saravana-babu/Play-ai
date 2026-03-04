@@ -18,7 +18,7 @@ export default function Home() {
       ? GAMES
       : GAMES.filter((g) => g.category === activeCategory);
 
-  const hasAnyKey = !!(apiKeys.gemini || apiKeys.openai || apiKeys.anthropic);
+  const hasAnyKey = !!(apiKeys.gemini || apiKeys.openai || apiKeys.anthropic || apiKeys.deepseek || apiKeys.groq);
 
   return (
     <div className="space-y-16">
@@ -26,12 +26,33 @@ export default function Home() {
       <section className="relative overflow-hidden rounded-3xl bg-slate-900 border border-white/5 p-8 sm:p-12 lg:p-16">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-violet-500/10" />
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/20 blur-3xl rounded-full" />
-        
+
         <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-medium border border-indigo-500/20">
-              <Sparkles className="w-4 h-4" />
-              <span>Powered by Multiple LLMs</span>
+            <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-medium border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.1)]">
+              <Sparkles className="w-4 h-4 animate-pulse" />
+              <div className="flex items-center gap-2">
+                <span>Powered by</span>
+                <div className="relative h-5 w-20 overflow-hidden font-bold">
+                  <motion.div
+                    animate={{
+                      y: [0, -20, -40, -60, -80, 0],
+                    }}
+                    transition={{
+                      duration: 10,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    className="absolute inset-0 flex flex-col"
+                  >
+                    <span className="h-5 flex items-center">Gemini</span>
+                    <span className="h-5 flex items-center text-blue-400">GPT-4o</span>
+                    <span className="h-5 flex items-center text-orange-400">Claude</span>
+                    <span className="h-5 flex items-center text-emerald-400">DeepSeek</span>
+                    <span className="h-5 flex items-center text-rose-400">Groq</span>
+                  </motion.div>
+                </div>
+              </div>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
               Challenge the <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Play-AI.in</span> Mind
@@ -39,7 +60,7 @@ export default function Home() {
             <p className="text-lg text-slate-400 max-w-xl leading-relaxed">
               Play 50+ brain-teasing games against advanced AI. Win to prove your intellect, lose and face a hilarious penalty task.
             </p>
-            
+
             {!hasAnyKey ? (
               <div className="flex flex-wrap gap-4 pt-4">
                 <Link
@@ -62,7 +83,7 @@ export default function Home() {
               </div>
             )}
           </div>
-          
+
           <div className="relative hidden lg:block">
             <DemoGame />
           </div>
@@ -107,7 +128,7 @@ export default function Home() {
           </div>
           <h3 className="text-lg font-bold text-white">Multi-Model Support</h3>
           <p className="text-sm text-slate-400 leading-relaxed">
-            Switch between Gemini, OpenAI, and Anthropic on the fly to experience different AI personalities and challenges.
+            Switch between Gemini, OpenAI, Anthropic, DeepSeek, and Groq on the fly to experience different AI personalities.
           </p>
         </div>
       </section>
@@ -120,8 +141,8 @@ export default function Home() {
         <div className="space-y-1">
           <h4 className="text-lg font-bold text-white">Important Disclaimer</h4>
           <p className="text-sm text-slate-400 leading-relaxed">
-            This website utilizes your personal API keys (Gemini, OpenAI, or Anthropic) to power AI features. 
-            <span className="text-amber-400/80 font-medium"> You are solely responsible for any costs incurred through your API usage.</span> 
+            This website utilizes your personal API keys (Gemini, OpenAI, Anthropic, DeepSeek, or Groq) to power AI features.
+            <span className="text-amber-400/80 font-medium"> You are solely responsible for any costs incurred through your API usage.</span>
             Please monitor your usage limits and billing settings on your respective provider's dashboard.
           </p>
         </div>
@@ -131,17 +152,16 @@ export default function Home() {
       <section id="games" className="space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h2 className="text-3xl font-bold tracking-tight">Game Library</h2>
-          
+
           <div className="flex overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 gap-2 no-scrollbar">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                  activeCategory === category
-                    ? 'bg-white text-slate-950 shadow-md'
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
-                }`}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${activeCategory === category
+                  ? 'bg-white text-slate-950 shadow-md'
+                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
+                  }`}
               >
                 {category}
               </button>
@@ -158,20 +178,20 @@ export default function Home() {
               transition={{ delay: index * 0.05 }}
             >
               <Link
-                to={game.isPlayable && user && hasAnyKey ? `/games/${game.id}` : '#'}
+                to={(game.isPlayable && user && (game.requiresAi === false || hasAnyKey)) ? `/games/${game.id}` : '#'}
                 onClick={(e) => {
-                  if (!game.isPlayable || !user || !hasAnyKey) {
+                  const canPlay = game.isPlayable && user && (game.requiresAi === false || hasAnyKey);
+                  if (!canPlay) {
                     e.preventDefault();
                     if (!user) navigate('/login');
-                    else if (!hasAnyKey) navigate('/settings');
+                    else if (game.requiresAi !== false && !hasAnyKey) navigate('/settings');
                     else alert('This game is coming soon!');
                   }
                 }}
-                className={`block relative overflow-hidden rounded-2xl border p-6 transition-all duration-300 ${
-                  game.isPlayable
-                    ? 'bg-slate-900 border-white/10 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/10 group cursor-pointer'
-                    : 'bg-slate-900/50 border-white/5 opacity-75 cursor-not-allowed'
-                }`}
+                className={`block relative overflow-hidden rounded-2xl border p-6 transition-all duration-300 ${game.isPlayable
+                  ? 'bg-slate-900 border-white/10 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/10 group cursor-pointer'
+                  : 'bg-slate-900/50 border-white/5 opacity-75 cursor-not-allowed'
+                  }`}
               >
                 <div className="flex justify-between items-start mb-4">
                   <span className="px-2.5 py-1 rounded-md bg-slate-800 text-xs font-semibold text-slate-300 uppercase tracking-wider">
@@ -189,7 +209,7 @@ export default function Home() {
                 <p className="text-sm text-slate-400 line-clamp-2">
                   {game.description}
                 </p>
-                
+
                 {game.isPlayable && (
                   <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300">
                     <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">

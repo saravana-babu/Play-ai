@@ -1,0 +1,55 @@
+# Codebase Analysis: Play-AI (Neuroplay)
+
+Based on the exploration of the codebase, here is a comprehensive analysis of the **Play-AI** project.
+
+## Overview
+**Play-AI** (internally referred to as `neuroplay` in some places) is a web-based gaming application that allows users to play a huge array of mini-games and brain tests (45 different games) either solo or against AI opponents. A unique feature of the app is its deep integration with Large Language Models (LLMs) to power the computer opponents and generate dynamic "funny tasks" as a penalty when the user loses a game.
+
+## Tech Stack
+The application possesses a full-stack architecture running a single process for development, with Vite middleware integrated into an Express server.
+
+### Frontend
+- **Framework:** React 19 with TypeScript, bundled by Vite.
+- **Routing:** React Router v7 (`react-router-dom`).
+- **Styling:** Tailwind CSS v4, along with `lucide-react` for iconography and `clsx`/`tailwind-merge` for class manipulation.
+- **Animations:** Motion (Framer Motion).
+- **State Management:** Zustand (`zustand/middleware` for persisting user preferences and API keys).
+- **Game Dependencies:** Libraries like `chess.js` and `react-chessboard` for game-specific functionality.
+
+### Backend
+- **Server:** Node.js with Express v4.
+- **Database:** PostgreSQL (`pg`) for storing users, profiles, and game history. *(Note: `better-sqlite3` is in [package.json](file:///c:/Users/NTBI21233/OneDrive%20-%20Nissan%20Motor%20Corporation/POC/Play-ai/package.json) but the server uses `pg`)*.
+- **Authentication:** Custom JWT (`jsonwebtoken`) and password hashing (`bcryptjs`).
+- **Execution:** Runs via [tsx](file:///c:/Users/NTBI21233/OneDrive%20-%20Nissan%20Motor%20Corporation/POC/Play-ai/src/App.tsx) for development.
+
+### AI Integration
+- **Providers Supported:** Google Gemini (`@google/genai`), OpenAI (`openai`), and Anthropic (`@anthropic-ai/sdk`).
+- **Mechanics:** The application interacts directly with the LLM providers from the browser environment (using user-provided API keys stored in their account or local state). It tracks and logs the **Token Usage** for each prompt and completion.
+
+## Core Features & Architecture
+
+### 1. Robust Game Library (`src/games/`)
+The repository contains 45 different mini-games and cognitive tests implementations. Examples include:
+- **Classic Board Games:** Chess, Checkers, Connect4, TicTacToe, Backgammon.
+- **Word & Logic Puzzles:** Sudoku, Wordle, Boggle, Crossword, Scrabble, WordSearch.
+- **Cognitive Tests:** AimTrainer, ReactionTime, ChimpTest, VisualMemory, TypingTest.
+- **Arcade/Casual:** FlappyBird, DinosaurRun, Pong, Minesweeper.
+
+### 2. AI Implementation Layer (`src/lib/ai.ts`)
+The true novelty of the app lies in the AI integration mapping. The game state is serialized into JSON and sent to the LLM (along with system instructions for the game rules) asking it to evaluate the board and perform a move.
+- `generateNextMove`: Asks the LLM to decide the next move based on the serialized `gameState` and returns a JSON. Included retry logic for rate-limits (`429`).
+- `generateFunnyTask`: If the human player loses, the app prompts the AI to generate a "funny, harmless, and slightly embarrassing task" for the user to perform as a penalty.
+
+### 3. Server & Database Schema (`server.ts`)
+The backend provides a lightweight REST API that handles:
+- **`users`**: Secure account creation out of the box with `bcryptjs`.
+- **`profiles`**: Stores the user's selected LLM provider and API keys securely in the DB (syncing with the frontend Zustand store).
+- **`game_results`**: Tracks historical game logs, noting the game played, who won, the generated AI funny task, and the total tokens consumed during the session.
+
+### 4. Development & Build Setup
+The development process is streamlined using `tsx` to run the `server.ts` file, which sets up Vite in "middleware mode" to serve the hot-reloading React application directly through Express. For production, it falls back to serving the static `dist/` directory.
+
+## Potential Areas for Review / Improvement
+- **Frontend Environment Variables:** In `src/lib/ai.ts`, it references `process.env.GEMINI_API_KEY`. As Vite applications use `import.meta.env` and require the `VITE_` prefix by default, this might not expose the default API key correctly in the browser unless specific Node/Vite plugins are bridging it.
+- **API Key Security:** Currently, SDKs like OpenAI and Anthropic are instantiated with `dangerouslyAllowBrowser: true`. While this handles user-provided keys properly (since caching them server-side would be a liability), any default keys loaded into the bundle could be easily extracted by players.
+- **Legacy Dependencies:** Clean out `better-sqlite3` from `package.json` if PostgreSQL is the intended permanent engine.

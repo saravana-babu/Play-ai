@@ -6,7 +6,7 @@ import { fetchApi, removeAuthToken, getAuthToken } from '../lib/api';
 import { motion } from 'motion/react';
 
 export default function Layout() {
-  const { user, setUser, setApiKeys, setSelectedLlm } = useStore();
+  const { user, setUser, setApiKeys, setSelectedLlm, setProviderModel, setOllamaSettings } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -23,10 +23,23 @@ export default function Layout() {
             setApiKeys({
               gemini: data.gemini_key || '',
               openai: data.openai_key || '',
-              anthropic: data.anthropic_key || ''
+              anthropic: data.anthropic_key || '',
+              deepseek: data.deepseek_key || '',
+              groq: data.groq_key || '',
             });
             if (data.selected_llm) {
               setSelectedLlm(data.selected_llm);
+            }
+            if (data.provider_models) {
+              Object.entries(data.provider_models).forEach(([provider, model]) => {
+                setProviderModel(provider as any, model as string);
+              });
+            }
+            if (data.ollama_url || data.ollama_model) {
+              setOllamaSettings({
+                url: data.ollama_url || 'http://localhost:11434',
+                model: data.ollama_model || 'llama3'
+              });
             }
           }
         })
@@ -36,7 +49,7 @@ export default function Layout() {
           setUser(null);
         });
     }
-  }, [setUser, setApiKeys, setSelectedLlm]);
+  }, [setUser, setApiKeys, setSelectedLlm, setProviderModel, setOllamaSettings]);
 
   const handleLogout = () => {
     removeAuthToken();
@@ -64,18 +77,16 @@ export default function Layout() {
                 <>
                   <Link
                     to="/history"
-                    className={`p-2 rounded-lg transition-colors ${
-                      location.pathname === '/history' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
-                    }`}
+                    className={`p-2 rounded-lg transition-colors ${location.pathname === '/history' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      }`}
                     title="History"
                   >
                     <History className="w-5 h-5" />
                   </Link>
                   <Link
                     to="/settings"
-                    className={`p-2 rounded-lg transition-colors ${
-                      location.pathname === '/settings' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
-                    }`}
+                    className={`p-2 rounded-lg transition-colors ${location.pathname === '/settings' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      }`}
                     title="Settings"
                   >
                     <Settings className="w-5 h-5" />

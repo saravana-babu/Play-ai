@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, BrainCircuit, HelpCircle, Send } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type Tile = { char: string; score: number };
 const TILE_SCORES: Record<string, number> = {
@@ -103,7 +104,7 @@ export default function Scrabble() {
 
   const handlePlaceWord = async (word: string, r: number, c: number, dir: 'h' | 'v') => {
     if (turn !== 'player' || gameOver || loading) return;
-    
+
     // Simplified validation: just check if it fits
     const newBoard = [...board];
     let canPlace = true;
@@ -195,23 +196,23 @@ export default function Scrabble() {
                 </div>
               ))}
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-              <input 
+              <input
                 id="wordInput"
-                type="text" 
-                placeholder="Enter word..." 
+                type="text"
+                placeholder="Enter word..."
                 className="bg-slate-800 border border-white/10 rounded-xl px-4 py-2 text-white font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <div className="flex gap-2">
                 <input id="rowInput" type="number" placeholder="Row" className="w-16 bg-slate-800 border border-white/10 rounded-xl px-2 py-2 text-white text-center" />
                 <input id="colInput" type="number" placeholder="Col" className="w-16 bg-slate-800 border border-white/10 rounded-xl px-2 py-2 text-white text-center" />
-                <select id="dirInput" className="bg-slate-800 border border-white/10 rounded-xl px-2 py-2 text-white">
-                  <option value="h">H</option>
-                  <option value="v">V</option>
+                <select id="dirInput" className="bg-slate-800 border border-white/10 rounded-xl px-2 py-2 text-white font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                  <option value="h" className="bg-slate-800">Horizontal</option>
+                  <option value="v" className="bg-slate-800">Vertical</option>
                 </select>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   const word = (document.getElementById('wordInput') as HTMLInputElement).value;
                   const r = parseInt((document.getElementById('rowInput') as HTMLInputElement).value);
@@ -258,7 +259,13 @@ export default function Scrabble() {
                     <p className="text-sm text-rose-200 italic">"{funnyTask}"</p>
                   </div>
                 )}
-                <button onClick={initGame} className="w-full py-3 bg-indigo-500 text-white rounded-xl font-bold">Play Again</button>
+                <ShareButtons
+                  gameTitle="Scrabble"
+                  result={playerScore >= aiScore ? `defeated the AI with ${playerScore} points` : `scored ${playerScore} points against the AI`}
+                  score={playerScore}
+                  penalty={funnyTask}
+                />
+                <button onClick={initGame} className="w-full py-3 bg-indigo-500 text-white rounded-xl font-bold mt-4">Play Again</button>
               </motion.div>
             )}
           </AnimatePresence>

@@ -4,6 +4,7 @@ import { generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, Info } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type Player = 1 | 2;
 
@@ -51,7 +52,7 @@ export default function Mancala() {
 
     while (stones > 0) {
       current = (current + 1) % 14;
-      
+
       // Skip opponent's store
       if (player === 1 && current === 13) continue;
       if (player === 2 && current === 6) continue;
@@ -83,7 +84,7 @@ export default function Mancala() {
 
     // Extra turn rule
     const extraTurn = (player === 1 && current === 6) || (player === 2 && current === 13);
-    
+
     if (checkGameOver(newBoard)) {
       handleEnd(newBoard);
     } else if (!extraTurn) {
@@ -98,7 +99,7 @@ export default function Mancala() {
 
   const aiMove = (currentBoard: number[]) => {
     if (gameOver) return;
-    
+
     // Simple AI: pick the pit with most stones or one that gives extra turn
     const validPits = [7, 8, 9, 10, 11, 12].filter(i => currentBoard[i] > 0);
     if (validPits.length === 0) return;
@@ -151,7 +152,7 @@ export default function Mancala() {
     // Move remaining stones to stores
     const p1Remaining = finalBoard.slice(0, 6).reduce((a, b) => a + b, 0);
     const p2Remaining = finalBoard.slice(7, 13).reduce((a, b) => a + b, 0);
-    
+
     finalBoard[6] += p1Remaining;
     finalBoard[13] += p2Remaining;
     for (let i = 0; i < 6; i++) finalBoard[i] = 0;
@@ -162,12 +163,12 @@ export default function Mancala() {
 
     const p1Score = finalBoard[6];
     const p2Score = finalBoard[13];
-    
+
     let result: Player | 'draw';
     if (p1Score > p2Score) result = 1;
     else if (p2Score > p1Score) result = 2;
     else result = 'draw';
-    
+
     setWinner(result);
 
     let task = null;
@@ -212,13 +213,13 @@ export default function Mancala() {
         <div className="flex items-center justify-between gap-4">
           {/* AI Store */}
           <div className="w-20 h-64 bg-slate-800 rounded-full border border-white/5 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
-             <div className="absolute top-4 text-[10px] font-bold text-slate-500 uppercase">AI</div>
-             <div className="text-2xl font-black text-rose-400">{board[13]}</div>
-             <div className="flex flex-wrap justify-center gap-1 p-2">
-               {[...Array(Math.min(board[13], 12))].map((_, i) => (
-                 <div key={i} className="w-2 h-2 rounded-full bg-rose-500/40" />
-               ))}
-             </div>
+            <div className="absolute top-4 text-[10px] font-bold text-slate-500 uppercase">AI</div>
+            <div className="text-2xl font-black text-rose-400">{board[13]}</div>
+            <div className="flex flex-wrap justify-center gap-1 p-2">
+              {[...Array(Math.min(board[13], 12))].map((_, i) => (
+                <div key={i} className="w-2 h-2 rounded-full bg-rose-500/40" />
+              ))}
+            </div>
           </div>
 
           {/* Pits */}
@@ -264,10 +265,10 @@ export default function Mancala() {
             <div className="absolute top-4 text-[10px] font-bold text-slate-500 uppercase">You</div>
             <div className="text-2xl font-black text-indigo-400">{board[6]}</div>
             <div className="flex flex-wrap justify-center gap-1 p-2">
-               {[...Array(Math.min(board[6], 12))].map((_, i) => (
-                 <div key={i} className="w-2 h-2 rounded-full bg-indigo-500/40" />
-               ))}
-             </div>
+              {[...Array(Math.min(board[6], 12))].map((_, i) => (
+                <div key={i} className="w-2 h-2 rounded-full bg-indigo-500/40" />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -308,7 +309,14 @@ export default function Mancala() {
               </div>
             )}
 
-            <button onClick={initGame} className="px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all">
+            <ShareButtons
+              gameTitle="Mancala"
+              result={winner === 1 ? 'harvested more stones than the AI' : winner === 2 ? 'got outplayed in the pits' : 'reached a perfect balance'}
+              score={`${board[6]}-${board[13]}`}
+              penalty={funnyTask}
+            />
+
+            <button onClick={initGame} className="px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all mt-4">
               Play Again
             </button>
           </motion.div>

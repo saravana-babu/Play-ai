@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useStore } from '../store/useStore';
+import { useStore, LlmProvider } from '../store/useStore';
 import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Frown, Minus } from 'lucide-react';
-import ShareButton from '../components/ShareButton';
+import ShareButtons from '../components/ShareButtons';
 
 type Player = 'X' | 'O' | null;
 
@@ -14,7 +14,7 @@ export default function TicTacToe() {
   const [winner, setWinner] = useState<Player | 'Draw'>(null);
   const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
   const [funnyTask, setFunnyTask] = useState<string | null>(null);
-  const { apiKeys, selectedLlm, user, gameSessionTokens, resetSessionTokens } = useStore();
+  const { apiKeys, selectedLlm, player1Llm, gameMode, user, gameSessionTokens, resetSessionTokens } = useStore();
   const isMounted = useRef(true);
 
   useEffect(() => {
@@ -25,10 +25,14 @@ export default function TicTacToe() {
   }, []);
 
   useEffect(() => {
-    if (!isXNext && !winner) {
-      makeAiMove();
+    if (!winner) {
+      if (!isXNext) {
+        makeAiMove('O', selectedLlm);
+      } else if (gameMode === 'llm-vs-llm') {
+        makeAiMove('X', player1Llm);
+      }
     }
-  }, [isXNext, winner]);
+  }, [isXNext, winner, gameMode]);
 
   const checkWinner = (squares: Player[]) => {
     const lines = [
@@ -50,8 +54,8 @@ export default function TicTacToe() {
     if (!isMounted.current) return;
     setWinner(result);
     let task = null;
-    
-    if (result === 'O' && apiKeys[selectedLlm]) {
+
+    if (result === 'O' && apiKeys[selectedLlm] && gameMode !== 'llm-vs-llm') {
       task = await generateFunnyTask(selectedLlm, apiKeys, 'Tic-Tac-Toe');
       if (!isMounted.current) return;
       setFunnyTask(task);
@@ -59,11 +63,16 @@ export default function TicTacToe() {
 
     if (user && isMounted.current) {
       try {
+        let winnerLabel = result === 'X' ? 'user' : result === 'O' ? 'ai' : 'draw';
+        if (gameMode === 'llm-vs-llm') {
+          winnerLabel = result === 'X' ? 'ai-1' : result === 'O' ? 'ai-2' : 'draw';
+        }
+
         await fetchApi('/history', {
           method: 'POST',
           body: JSON.stringify({
             game_id: 'tictactoe',
-            winner: result === 'X' ? 'user' : result === 'O' ? 'ai' : 'draw',
+            winner: winnerLabel,
             funny_task: task,
             total_tokens: gameSessionTokens
           })
@@ -75,12 +84,12 @@ export default function TicTacToe() {
   };
 
   const handleClick = (i: number) => {
-    if (board[i] || winner || !isXNext || isAiThinking) return;
+    if (board[i] || winner || !isXNext || isAiThinking || gameMode === 'llm-vs-llm') return;
 
     const newBoard = [...board];
     newBoard[i] = 'X';
     setBoard(newBoard);
-    
+
     const result = checkWinner(newBoard);
     if (result) {
       handleWin(result);
@@ -89,27 +98,27 @@ export default function TicTacToe() {
     }
   };
 
-  const makeAiMove = async () => {
-    if (!apiKeys[selectedLlm] || !isMounted.current) return;
+  const makeAiMove = async (player: 'X' | 'O', llm: LlmProvider) => {
+    if (!apiKeys[llm] || !isMounted.current) return;
     setIsAiThinking(true);
 
     try {
-      const systemInstruction = `You are playing Tic-Tac-Toe as 'O'. The user is 'X'. The board is an array of 9 elements (0-8) representing rows from top to bottom. Null means empty. Current board: ${JSON.stringify(board)}. Return ONLY a JSON object with a single key 'move' containing the index (0-8) of your next move. Choose a winning move if possible, block the user if they are about to win, otherwise pick a strategic empty spot.`;
-      
-      const response = await generateNextMove(selectedLlm, apiKeys, 'tictactoe', { board }, systemInstruction);
-      
+      const systemInstruction = `You are playing Tic-Tac-Toe as '${player}'. The other player is '${player === 'X' ? 'O' : 'X'}'. The board is an array of 9 elements (0-8) representing rows from top to bottom. Null means empty. Current board: ${JSON.stringify(board)}. Return ONLY a JSON object with a single key 'move' containing the index (0-8) of your next move. Choose a winning move if possible, block the opponent if they are about to win, otherwise pick a strategic empty spot.`;
+
+      const response = await generateNextMove(llm, apiKeys, 'tictactoe', { board }, systemInstruction);
+
       if (!isMounted.current) return;
 
       if (response && typeof response.move === 'number' && !board[response.move]) {
         const newBoard = [...board];
-        newBoard[response.move] = 'O';
+        newBoard[response.move] = player;
         setBoard(newBoard);
-        
+
         const result = checkWinner(newBoard);
         if (result) {
           handleWin(result);
         } else {
-          setIsXNext(true);
+          setIsXNext(player === 'O');
         }
       } else {
         // Fallback random move if AI fails
@@ -117,11 +126,11 @@ export default function TicTacToe() {
         if (emptyIndices.length > 0) {
           const randomMove = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
           const newBoard = [...board];
-          newBoard[randomMove] = 'O';
+          newBoard[randomMove] = player;
           setBoard(newBoard);
           const result = checkWinner(newBoard);
           if (result) handleWin(result);
-          else setIsXNext(true);
+          else setIsXNext(player === 'O');
         }
       }
     } catch (error) {
@@ -132,11 +141,11 @@ export default function TicTacToe() {
       if (emptyIndices.length > 0) {
         const randomMove = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
         const newBoard = [...board];
-        newBoard[randomMove] = 'O';
+        newBoard[randomMove] = player;
         setBoard(newBoard);
         const result = checkWinner(newBoard);
         if (result) handleWin(result);
-        else setIsXNext(true);
+        else setIsXNext(player === 'O');
       }
     } finally {
       if (isMounted.current) {
@@ -157,12 +166,12 @@ export default function TicTacToe() {
     <div className="flex flex-col items-center">
       <div className="mb-8 flex items-center gap-8 text-center">
         <div className={`p-4 rounded-2xl border transition-colors ${isXNext && !winner ? 'bg-indigo-500/20 border-indigo-500/50' : 'bg-slate-800 border-white/10'}`}>
-          <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider mb-1">You</p>
+          <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider mb-1">{gameMode === 'llm-vs-llm' ? `AI 1 (${player1Llm})` : 'You'}</p>
           <p className="text-3xl font-bold text-indigo-400">X</p>
         </div>
         <div className="text-2xl font-bold text-slate-500">VS</div>
         <div className={`p-4 rounded-2xl border transition-colors ${!isXNext && !winner ? 'bg-emerald-500/20 border-emerald-500/50' : 'bg-slate-800 border-white/10'}`}>
-          <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider mb-1">AI</p>
+          <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider mb-1">{gameMode === 'llm-vs-llm' ? `AI 2 (${selectedLlm})` : 'AI'}</p>
           <p className="text-3xl font-bold text-emerald-400">O</p>
         </div>
       </div>
@@ -197,7 +206,9 @@ export default function TicTacToe() {
         {isAiThinking && !winner && (
           <div className="flex items-center gap-3 text-emerald-400">
             <RefreshCw className="w-5 h-5 animate-spin" />
-            <span className="font-medium animate-pulse">AI is thinking...</span>
+            <span className="font-medium animate-pulse">
+              {gameMode === 'llm-vs-llm' ? (isXNext ? 'AI 1 is thinking...' : 'AI 2 is thinking...') : 'AI is thinking...'}
+            </span>
           </div>
         )}
 
@@ -207,14 +218,13 @@ export default function TicTacToe() {
             animate={{ opacity: 1, y: 0 }}
             className="w-full text-center space-y-4"
           >
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-lg ${
-              winner === 'X' ? 'bg-indigo-500/20 text-indigo-400' :
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-lg ${winner === 'X' ? 'bg-indigo-500/20 text-indigo-400' :
               winner === 'O' ? 'bg-rose-500/20 text-rose-400' :
-              'bg-slate-700 text-slate-300'
-            }`}>
-              {winner === 'X' ? <><Trophy className="w-5 h-5" /> You Win!</> :
-               winner === 'O' ? <><Frown className="w-5 h-5" /> AI Wins!</> :
-               <><Minus className="w-5 h-5" /> It's a Draw!</>}
+                'bg-slate-700 text-slate-300'
+              }`}>
+              {winner === 'X' ? <><Trophy className="w-5 h-5" /> {gameMode === 'llm-vs-llm' ? 'AI 1 Wins!' : 'You Win!'}</> :
+                winner === 'O' ? <><Frown className="w-5 h-5" /> {gameMode === 'llm-vs-llm' ? 'AI 2 Wins!' : 'AI Wins!'}</> :
+                  <><Minus className="w-5 h-5" /> It's a Draw!</>}
             </div>
 
             {funnyTask && (
@@ -224,20 +234,12 @@ export default function TicTacToe() {
               </div>
             )}
 
-            <div className="flex gap-4 justify-center mt-4">
-              <button
-                onClick={resetGame}
-                className="px-6 py-3 bg-white text-slate-950 hover:bg-slate-200 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
-              >
-                <RefreshCw className="w-5 h-5" />
-                Play Again
-              </button>
-              <ShareButton 
-                gameTitle="Tic-Tac-Toe" 
-                winner={winner === 'X' ? 'user' : winner === 'O' ? 'ai' : 'draw'} 
-                funnyTask={funnyTask} 
-              />
-            </div>
+            <ShareButtons
+              gameTitle="Tic-Tac-Toe"
+              result={winner === 'X' ? 'conquered the grid' : winner === 'O' ? 'was outsmarted by the AI' : 'reached a stalemate'}
+              penalty={funnyTask}
+              onPlayAgain={resetGame}
+            />
           </motion.div>
         )}
       </div>

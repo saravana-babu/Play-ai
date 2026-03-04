@@ -4,6 +4,7 @@ import { getLlmResponse, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, Loader2 } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 export default function Wordle() {
   const [word, setWord] = useState('');
@@ -163,9 +164,12 @@ export default function Wordle() {
             </div>
           )}
 
-          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-all">
-            <RefreshCw className="w-5 h-5" /> New Game
-          </button>
+          <ShareButtons
+            gameTitle="Wordle"
+            result={winner ? 'guessed the word' : 'ran out of guesses'}
+            penalty={funnyTask}
+            onPlayAgain={initGame}
+          />
         </motion.div>
       )}
 

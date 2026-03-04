@@ -4,7 +4,7 @@ import { getLlmResponse, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Frown, Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import ShareButton from '../components/ShareButton';
+import ShareButtons from '../components/ShareButtons';
 
 interface Question {
   question: string;
@@ -141,7 +141,7 @@ export default function Trivia() {
             {current.options.map((option) => {
               const isCorrect = option === current.answer;
               const isSelected = option === selectedOption;
-              
+
               let buttonClass = 'bg-slate-800 border-white/10 text-slate-300 hover:border-white/20';
               if (showResult) {
                 if (isCorrect) buttonClass = 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400';
@@ -199,11 +199,11 @@ export default function Trivia() {
             <button onClick={initGame} className="flex items-center gap-2 px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all shadow-xl shadow-indigo-500/20">
               <RefreshCw className="w-5 h-5" /> Play Again
             </button>
-            <ShareButton 
-              gameTitle="Trivia" 
-              score={score}
-              winner={score >= 3 ? 'user' : 'ai'} 
-              funnyTask={funnyTask} 
+            <ShareButtons
+              gameTitle="Trivia"
+              score={`${score}/${questions.length}`}
+              result={score >= 3 ? 'showed off their massive brain' : 'failed the knowledge test'}
+              penalty={funnyTask}
             />
           </div>
         </motion.div>

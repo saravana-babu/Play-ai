@@ -4,6 +4,7 @@ import { generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion } from 'motion/react';
 import { RefreshCw, Trophy, Skull, User, Bot } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type Line = { r: number; c: number; type: 'h' | 'v' };
 type Box = { r: number; c: number; owner: 'user' | 'ai' | null };
@@ -54,7 +55,7 @@ export default function DotsAndBoxes() {
     const newlyFilledBoxes: number[] = [];
     const newBoxes = boxes.map((box, idx) => {
       if (box.owner) return box;
-      
+
       const hasTop = newLines.has(getLineKey(box.r, box.c, 'h'));
       const hasBottom = newLines.has(getLineKey(box.r + 1, box.c, 'h'));
       const hasLeft = newLines.has(getLineKey(box.r, box.c, 'v'));
@@ -72,7 +73,7 @@ export default function DotsAndBoxes() {
     if (newlyFilledBoxes.length > 0) {
       const newScores = { ...scores, [player]: scores[player] + newlyFilledBoxes.length };
       setScores(newScores);
-      
+
       if (newLines.size === (size * (size - 1) * 2)) {
         handleEnd(newScores.user > newScores.ai ? 'user' : 'ai');
       } else if (player === 'ai') {
@@ -104,17 +105,17 @@ export default function DotsAndBoxes() {
 
     // Simple AI: prioritize completing a box
     let bestMove = availableLines[Math.floor(Math.random() * availableLines.length)];
-    
+
     for (const line of availableLines) {
       const tempLines = new Set<string>(currentLines);
       tempLines.add(getLineKey(line.r, line.c, line.type));
-      
+
       const completed = currentBoxes.some(box => {
         if (box.owner) return false;
         return tempLines.has(getLineKey(box.r, box.c, 'h')) &&
-               tempLines.has(getLineKey(box.r + 1, box.c, 'h')) &&
-               tempLines.has(getLineKey(box.r, box.c, 'v')) &&
-               tempLines.has(getLineKey(box.r, box.c + 1, 'v'));
+          tempLines.has(getLineKey(box.r + 1, box.c, 'h')) &&
+          tempLines.has(getLineKey(box.r, box.c, 'v')) &&
+          tempLines.has(getLineKey(box.r, box.c + 1, 'v'));
       });
 
       if (completed) {
@@ -233,7 +234,13 @@ export default function DotsAndBoxes() {
             </div>
           )}
 
-          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-all">
+          <ShareButtons
+            gameTitle="Dots and Boxes"
+            result={scores.user > scores.ai ? 'claimed the boxes' : 'was boxed in by the AI'}
+            penalty={funnyTask}
+            score={`${scores.user}-${scores.ai}`}
+          />
+          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-all mt-4">
             <RefreshCw className="w-5 h-5" /> New Game
           </button>
         </motion.div>

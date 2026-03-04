@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, BrainCircuit, HelpCircle, Key } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 export default function Cryptogram() {
   const [originalText, setOriginalText] = useState('');
@@ -38,7 +39,7 @@ export default function Cryptogram() {
       if (response && response.quote) {
         const quote = response.quote.toUpperCase();
         setOriginalText(quote);
-        
+
         // Generate cipher map
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
         const shuffled = [...alphabet].sort(() => Math.random() - 0.5);
@@ -74,7 +75,7 @@ export default function Cryptogram() {
   const handleCharChange = (cipherChar: string, value: string) => {
     const upperValue = value.toUpperCase();
     if (upperValue.length > 1) return;
-    
+
     setUserMap(prev => ({
       ...prev,
       [cipherChar]: upperValue
@@ -169,9 +170,15 @@ export default function Cryptogram() {
                 <h2 className="text-4xl font-black text-white">Victory!</h2>
                 <p className="text-slate-400">You decoded all messages!</p>
               </div>
+              <ShareButtons
+                gameTitle="Cryptogram"
+                result="decoded the secret message"
+                score={score}
+                penalty={funnyTask}
+              />
               <button
                 onClick={resetGame}
-                className="px-10 py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-500/25"
+                className="px-10 py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-500/25 mt-4"
               >
                 Play Again
               </button>
@@ -228,8 +235,8 @@ export default function Cryptogram() {
         <div className="space-y-1">
           <p className="text-sm text-white font-bold">How to Play</p>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Each letter in the message has been replaced with a different letter. 
-            Your goal is to figure out the substitution and decode the original message. 
+            Each letter in the message has been replaced with a different letter.
+            Your goal is to figure out the substitution and decode the original message.
             Type your guesses into the boxes above the cipher letters.
           </p>
         </div>

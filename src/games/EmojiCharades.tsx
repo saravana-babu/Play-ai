@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, HelpCircle, Send, Loader2 } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 interface Charade {
   emojis: string;
@@ -114,7 +115,7 @@ export default function EmojiCharades() {
       const newLives = lives - 1;
       setLives(newLives);
       setFeedback({ type: 'error', message: 'Incorrect! Try again.' });
-      
+
       if (newLives <= 0) {
         handleGameOver();
       } else {
@@ -158,9 +159,9 @@ export default function EmojiCharades() {
             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Lives</p>
             <div className="flex gap-1 mt-1">
               {[...Array(3)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`w-4 h-4 rounded-full ${i < lives ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'bg-slate-800'}`} 
+                <div
+                  key={i}
+                  className={`w-4 h-4 rounded-full ${i < lives ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'bg-slate-800'}`}
                 />
               ))}
             </div>
@@ -178,7 +179,7 @@ export default function EmojiCharades() {
             <p className="text-slate-400 font-medium animate-pulse">AI is thinking of a charade...</p>
           </div>
         ) : charade && !gameOver ? (
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="w-full flex flex-col items-center gap-8"
@@ -186,7 +187,7 @@ export default function EmojiCharades() {
             <div className="px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold uppercase tracking-widest">
               {charade.category}
             </div>
-            
+
             <div className="text-6xl sm:text-8xl tracking-widest text-center drop-shadow-2xl">
               {charade.emojis}
             </div>
@@ -201,7 +202,7 @@ export default function EmojiCharades() {
                 className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-6 py-4 text-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors pr-16"
                 disabled={!!feedback}
               />
-              <button 
+              <button
                 type="submit"
                 disabled={!guess.trim() || !!feedback}
                 className="absolute right-2 top-2 bottom-2 aspect-square bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-800 text-white rounded-xl flex items-center justify-center transition-colors"
@@ -216,9 +217,8 @@ export default function EmojiCharades() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className={`px-6 py-3 rounded-xl font-bold ${
-                    feedback.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
-                  }`}
+                  className={`px-6 py-3 rounded-xl font-bold ${feedback.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                    }`}
                 >
                   {feedback.message}
                 </motion.div>
@@ -253,9 +253,15 @@ export default function EmojiCharades() {
                   </div>
                 )}
 
+                <ShareButtons
+                  gameTitle="Emoji Charades"
+                  result={`solved ${score} charades`}
+                  score={score}
+                  penalty={funnyTask}
+                />
                 <button
                   onClick={initGame}
-                  className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-500/25"
+                  className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-500/25 mt-4"
                 >
                   Play Again
                 </button>

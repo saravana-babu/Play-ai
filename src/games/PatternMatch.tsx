@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, BrainCircuit, HelpCircle, Send } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 export default function PatternMatch() {
   const [pattern, setPattern] = useState<string[]>([]);
@@ -173,9 +174,15 @@ export default function PatternMatch() {
                 </div>
               )}
 
+              <ShareButtons
+                gameTitle="Pattern Match"
+                result={score >= 10 ? 'unlocked the logic secrets' : 'got confused by patterns'}
+                score={score}
+                penalty={funnyTask}
+              />
               <button
                 onClick={resetGame}
-                className="px-10 py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-500/25"
+                className="px-10 py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-500/25 mt-4"
               >
                 Try Again
               </button>
@@ -222,7 +229,7 @@ export default function PatternMatch() {
         <div className="space-y-1">
           <p className="text-sm text-white font-bold">How to Play</p>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Analyze the sequence of items and identify the underlying logical pattern. 
+            Analyze the sequence of items and identify the underlying logical pattern.
             Select the item that correctly completes the sequence. You have 3 lives.
           </p>
         </div>

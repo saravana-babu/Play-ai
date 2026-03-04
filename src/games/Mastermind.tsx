@@ -4,6 +4,7 @@ import { generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion } from 'motion/react';
 import { RefreshCw, Trophy, Skull, CheckCircle2, Circle } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 const COLORS = ['bg-rose-500', 'bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-violet-500', 'bg-cyan-500'];
 
@@ -120,9 +121,9 @@ export default function Mastermind() {
               <div className="w-6 text-xs font-bold text-slate-500">{i + 1}</div>
               <div className="flex gap-2 flex-1">
                 {[...Array(4)].map((_, j) => (
-                  <div 
-                    key={j} 
-                    className={`w-8 h-8 rounded-full border border-white/10 ${guessData ? COLORS[guessData.guess[j]] : 'bg-slate-900'}`} 
+                  <div
+                    key={j}
+                    className={`w-8 h-8 rounded-full border border-white/10 ${guessData ? COLORS[guessData.guess[j]] : 'bg-slate-900'}`}
                   />
                 ))}
               </div>
@@ -190,7 +191,12 @@ export default function Mastermind() {
             </div>
           )}
 
-          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-all">
+          <ShareButtons
+            gameTitle="Mastermind"
+            result={winner ? 'cracked the secret code' : 'failed the mission'}
+            penalty={funnyTask}
+          />
+          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-all mt-4">
             <RefreshCw className="w-5 h-5" /> New Game
           </button>
         </motion.div>

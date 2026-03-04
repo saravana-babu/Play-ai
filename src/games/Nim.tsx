@@ -4,6 +4,7 @@ import { generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion } from 'motion/react';
 import { RefreshCw, Trophy, Skull, User, Bot } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 export default function Nim() {
   const [piles, setPiles] = useState<number[]>([3, 4, 5]);
@@ -27,7 +28,7 @@ export default function Nim() {
 
   const handleTake = (pileIndex: number, count: number) => {
     if (turn !== 'user' || gameOver) return;
-    
+
     const newPiles = [...piles];
     newPiles[pileIndex] -= count;
     setPiles(newPiles);
@@ -149,7 +150,12 @@ export default function Nim() {
             </div>
           )}
 
-          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-all">
+          <ShareButtons
+            gameTitle="Nim"
+            result={winner === 'user' ? 'outsmarted the AI in a game of Nim' : 'lost the battle of items'}
+            penalty={funnyTask}
+          />
+          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-all mt-4">
             <RefreshCw className="w-5 h-5" /> New Game
           </button>
         </motion.div>

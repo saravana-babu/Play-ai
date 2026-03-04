@@ -4,6 +4,7 @@ import { generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, Info } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type Piece = 'w' | 'b' | null;
 type Board = Piece[][];
@@ -48,7 +49,7 @@ export default function Reversi() {
 
   const canMove = (r: number, c: number, b: Board, player: Player) => {
     if (b[r][c] !== null) return [];
-    
+
     const directions = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]];
     const opponent = player === 'w' ? 'b' : 'w';
     const toFlip: [number, number][] = [];
@@ -89,7 +90,7 @@ export default function Reversi() {
 
     const opponent = player === 'w' ? 'b' : 'w';
     const nextMoves = getValidMoves(newBoard, opponent);
-    
+
     if (nextMoves.length > 0) {
       setTurn(opponent);
       if (opponent === 'w') {
@@ -140,12 +141,12 @@ export default function Reversi() {
     setGameOver(true);
     const bCount = b.flat().filter(c => c === 'b').length;
     const wCount = b.flat().filter(c => c === 'w').length;
-    
+
     let result: Player | 'draw';
     if (bCount > wCount) result = 'b';
     else if (wCount > bCount) result = 'w';
     else result = 'draw';
-    
+
     setWinner(result);
 
     let task = null;
@@ -188,7 +189,7 @@ export default function Reversi() {
       </div>
 
       <div className="bg-emerald-900 p-4 rounded-3xl border-8 border-emerald-950 shadow-2xl w-full aspect-square grid grid-cols-8 gap-1">
-        {board.map((row, r) => 
+        {board.map((row, r) =>
           row.map((cell, c) => {
             const isValid = turn === 'b' && canMove(r, c, board, 'b').length > 0;
             return (
@@ -253,7 +254,14 @@ export default function Reversi() {
               </div>
             )}
 
-            <button onClick={initGame} className="px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all">
+            <ShareButtons
+              gameTitle="Reversi"
+              result={winner === 'b' ? 'captured the board' : winner === 'w' ? 'got flipped by the AI' : 'reached a strategic tie'}
+              score={`${bCount}-${wCount}`}
+              penalty={funnyTask}
+            />
+
+            <button onClick={initGame} className="px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all mt-4">
               Play Again
             </button>
           </motion.div>

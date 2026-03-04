@@ -4,6 +4,7 @@ import { generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 export default function SlidingPuzzle() {
   const [tiles, setTiles] = useState<number[]>([]);
@@ -20,7 +21,7 @@ export default function SlidingPuzzle() {
     do {
       newTiles.sort(() => Math.random() - 0.5);
     } while (!isSolvable(newTiles) || isSolved(newTiles));
-    
+
     setTiles(newTiles);
     setGameOver(false);
     setMoves(0);
@@ -57,7 +58,7 @@ export default function SlidingPuzzle() {
     const emptyCol = emptyIndex % size;
 
     const isAdjacent = (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
-                      (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+      (Math.abs(col - emptyCol) === 1 && row === emptyRow);
 
     if (isAdjacent) {
       const newTiles = [...tiles];
@@ -116,7 +117,12 @@ export default function SlidingPuzzle() {
             <h3 className="text-2xl font-bold text-white mb-1">Puzzle Solved!</h3>
             <p className="text-slate-400">Completed in {moves} moves.</p>
           </div>
-          <button onClick={initGame} className="px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all">
+          <ShareButtons
+            gameTitle="Sliding Puzzle"
+            result={`solved the puzzle in ${moves} moves`}
+            score={moves}
+          />
+          <button onClick={initGame} className="px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all mt-4">
             Play Again
           </button>
         </motion.div>

@@ -4,6 +4,7 @@ import { generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, Crosshair, Shield, Info } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type CellState = 'empty' | 'ship' | 'hit' | 'miss';
 type Grid = CellState[][];
@@ -122,7 +123,7 @@ export default function Battleship() {
 
     const newPlayerGrid = [...playerGrid.map(r => [...r])];
     let row, col;
-    
+
     // Simple AI: pick a random empty or ship cell
     do {
       row = Math.floor(Math.random() * GRID_SIZE);
@@ -187,11 +188,6 @@ export default function Battleship() {
             </button>
           </div>
         )}
-        {gameState === 'gameOver' && (
-          <button onClick={initGame} className="px-8 py-3 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-colors font-bold flex items-center gap-2 mx-auto">
-            <RefreshCw className="w-5 h-5" /> Play Again
-          </button>
-        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 w-full">
@@ -204,15 +200,15 @@ export default function Battleship() {
             <span className="text-xs text-slate-500 uppercase font-bold tracking-widest">Defense</span>
           </div>
           <div className="grid grid-cols-10 gap-1 bg-slate-900 p-2 rounded-2xl border border-white/10 shadow-xl aspect-square">
-            {playerGrid.map((row, rIdx) => 
+            {playerGrid.map((row, rIdx) =>
               row.map((cell, cIdx) => (
                 <div
                   key={`${rIdx}-${cIdx}`}
                   className={`rounded-sm transition-all duration-300 flex items-center justify-center
-                    ${cell === 'empty' ? 'bg-slate-800/50' : 
+                    ${cell === 'empty' ? 'bg-slate-800/50' :
                       cell === 'ship' ? 'bg-indigo-500/40 border border-indigo-500/50' :
-                      cell === 'hit' ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' :
-                      'bg-slate-700'}
+                        cell === 'hit' ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' :
+                          'bg-slate-700'}
                   `}
                 >
                   {cell === 'hit' && <Crosshair className="w-3 h-3 text-white" />}
@@ -232,16 +228,16 @@ export default function Battleship() {
             <span className="text-xs text-slate-500 uppercase font-bold tracking-widest">Attack</span>
           </div>
           <div className="grid grid-cols-10 gap-1 bg-slate-900 p-2 rounded-2xl border border-white/10 shadow-xl aspect-square">
-            {aiVisibleGrid.map((row, rIdx) => 
+            {aiVisibleGrid.map((row, rIdx) =>
               row.map((cell, cIdx) => (
                 <button
                   key={`${rIdx}-${cIdx}`}
                   onClick={() => handleAttack(rIdx, cIdx)}
                   disabled={gameState !== 'playing' || turn !== 'player' || cell !== 'empty'}
                   className={`rounded-sm transition-all duration-300 flex items-center justify-center
-                    ${cell === 'empty' ? 'bg-slate-800 hover:bg-slate-700 cursor-crosshair' : 
+                    ${cell === 'empty' ? 'bg-slate-800 hover:bg-slate-700 cursor-crosshair' :
                       cell === 'hit' ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' :
-                      'bg-slate-700'}
+                        'bg-slate-700'}
                   `}
                 >
                   {cell === 'hit' && <Crosshair className="w-3 h-3 text-white" />}
@@ -276,12 +272,12 @@ export default function Battleship() {
               )}
             </div>
 
-            {funnyTask && (
-              <div className="mt-6 p-6 bg-rose-500/10 border border-rose-500/20 rounded-3xl text-center">
-                <p className="text-xs text-rose-400 font-bold uppercase tracking-widest mb-2">Penalty</p>
-                <p className="text-lg text-rose-200 italic">"{funnyTask}"</p>
-              </div>
-            )}
+            <ShareButtons
+              gameTitle="Battleship"
+              result={winner === 'player' ? 'sunk the enemy fleet' : 'lost their fleet to the AI'}
+              penalty={funnyTask}
+              onPlayAgain={initGame}
+            />
           </motion.div>
         )}
       </AnimatePresence>

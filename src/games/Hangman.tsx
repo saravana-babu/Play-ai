@@ -4,7 +4,7 @@ import { generateFunnyTask, getLlmResponse } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion } from 'motion/react';
 import { RefreshCw, Trophy, Skull, Loader2 } from 'lucide-react';
-import ShareButton from '../components/ShareButton';
+import ShareButtons from '../components/ShareButtons';
 
 export default function Hangman() {
   const [word, setWord] = useState('');
@@ -110,7 +110,7 @@ export default function Hangman() {
         <div className="absolute bottom-0 left-4 w-2 h-full bg-slate-700" />
         <div className="absolute top-0 left-4 w-32 h-2 bg-slate-700" />
         <div className="absolute top-0 right-12 w-1 h-8 bg-slate-700" />
-        
+
         {/* Man */}
         {mistakes > 0 && <div className="absolute top-8 right-9 w-8 h-8 rounded-full border-4 border-slate-300" />}
         {mistakes > 1 && <div className="absolute top-16 right-12 w-1 h-16 bg-slate-300" />}
@@ -142,7 +142,7 @@ export default function Hangman() {
             onClick={() => handleGuess(letter)}
             disabled={guessed.includes(letter) || gameOver || loading}
             className={`w-10 h-10 rounded-lg font-bold transition-all
-              ${guessed.includes(letter) 
+              ${guessed.includes(letter)
                 ? (word.includes(letter) ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30 opacity-50')
                 : 'bg-slate-800 text-white hover:bg-slate-700 border-white/5'}
               border
@@ -169,10 +169,10 @@ export default function Hangman() {
             <button onClick={initGame} className="flex items-center gap-2 px-6 py-3 bg-indigo-500 text-white rounded-xl font-bold">
               <RefreshCw className="w-5 h-5" /> New Word
             </button>
-            <ShareButton 
-              gameTitle="Hangman" 
-              winner={winner ? 'user' : 'ai'} 
-              funnyTask={funnyTask} 
+            <ShareButtons
+              gameTitle="Hangman"
+              result={winner ? 'saved the day with their vocabulary' : 'let the man hang'}
+              penalty={funnyTask}
             />
           </div>
         </motion.div>

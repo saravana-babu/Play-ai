@@ -4,6 +4,7 @@ import { getLlmResponse, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, Loader2, CheckCircle2 } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 export default function Anagrams() {
   const [word, setWord] = useState('');
@@ -135,7 +136,7 @@ export default function Anagrams() {
             </div>
           ) : (
             <div className="text-center space-y-8">
-              <motion.div 
+              <motion.div
                 key={anagram}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -175,7 +176,13 @@ export default function Anagrams() {
             </div>
           )}
 
-          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all">
+          <ShareButtons
+            gameTitle="Anagrams"
+            result={score >= 3 ? 'unscrambled the truth' : 'got lost in the letters'}
+            score={score}
+            penalty={funnyTask}
+          />
+          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all mt-4">
             <RefreshCw className="w-5 h-5" /> Try Again
           </button>
         </motion.div>

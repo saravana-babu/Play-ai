@@ -1,31 +1,35 @@
 version: '3.8'
 
 services:
+  # The Application
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/neuroplay
-      - JWT_SECRET=your_super_secret_jwt_key_change_me
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-playai}
+      - JWT_SECRET=${JWT_SECRET:-please_change_this_secret_key_123}
     depends_on:
       db:
         condition: service_healthy
 
+  # The Database
   db:
     image: postgres:15-alpine
-    ports:
-      - "5432:5432"
+    restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=neuroplay
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_NAME:-playai}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
       timeout: 5s
       retries: 5
 

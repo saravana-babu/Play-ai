@@ -4,7 +4,7 @@ import { generateFunnyTask, getLlmResponse } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Frown, CheckCircle2, Lightbulb, Loader2 } from 'lucide-react';
-import ShareButton from '../components/ShareButton';
+import ShareButtons from '../components/ShareButtons';
 
 // Simple Sudoku Generator/Validator
 const isValid = (board: number[][], row: number, col: number, num: number) => {
@@ -50,7 +50,7 @@ const generateSudoku = (difficulty: 'easy' | 'medium' | 'hard') => {
   }
   solveSudoku(board);
   const solution = board.map(row => [...row]);
-  
+
   let attempts = difficulty === 'easy' ? 30 : difficulty === 'medium' ? 45 : 60;
   while (attempts > 0) {
     let row = Math.floor(Math.random() * 9);
@@ -119,13 +119,13 @@ export default function Sudoku() {
     if (gameOver || isHintLoading || !isMounted.current) return;
     setIsHintLoading(true);
     setHint(null);
-    
+
     try {
       const prompt = `I am playing Sudoku. Here is the current board state: ${JSON.stringify(grid)}. 
       The 0s are empty cells. 
       Give me a helpful hint about which cell to fill next and why. 
       Keep it short (max 2 sentences).`;
-      
+
       const response = await getLlmResponse(prompt, apiKeys, selectedLlm, "You are a Sudoku expert.", 'sudoku');
       if (!isMounted.current) return;
       setHint(response);
@@ -169,7 +169,7 @@ export default function Sudoku() {
       <div className="flex justify-between w-full mb-6 items-center">
         <h2 className="text-xl font-bold text-white">Sudoku</h2>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={getHint}
             disabled={isHintLoading || gameOver}
             className="p-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/20 transition-all flex items-center gap-2"
@@ -244,16 +244,12 @@ export default function Sudoku() {
               <p className="text-sm text-rose-200">{funnyTask}</p>
             </div>
           )}
-          <div className="flex gap-4 justify-center">
-            <button onClick={initGame} className="flex items-center gap-2 px-6 py-3 bg-indigo-500 text-white rounded-xl font-bold">
-              <RefreshCw className="w-5 h-5" /> New Game
-            </button>
-            <ShareButton 
-              gameTitle="Sudoku" 
-              winner={winner ? 'user' : 'ai'} 
-              funnyTask={funnyTask} 
-            />
-          </div>
+          <ShareButtons
+            gameTitle="Sudoku"
+            result={winner ? 'mastered the numbers' : 'got blocked by a logic trap'}
+            penalty={funnyTask}
+            onPlayAgain={initGame}
+          />
         </motion.div>
       )}
     </div>

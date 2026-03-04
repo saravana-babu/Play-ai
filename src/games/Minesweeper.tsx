@@ -4,6 +4,7 @@ import { generateFunnyTask, getLlmResponse } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, Bomb, Flag, Search, Loader2 } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type Cell = {
   isMine: boolean;
@@ -34,7 +35,7 @@ export default function Minesweeper() {
   const cols = 10;
 
   const initGame = () => {
-    const newGrid: Cell[][] = Array(rows).fill(null).map(() => 
+    const newGrid: Cell[][] = Array(rows).fill(null).map(() =>
       Array(cols).fill(null).map(() => ({
         isMine: false,
         isRevealed: false,
@@ -87,7 +88,7 @@ export default function Minesweeper() {
     if (gameOver || grid[r][c].isRevealed || grid[r][c].isFlagged) return;
 
     const newGrid = [...grid.map(row => [...row])];
-    
+
     if (newGrid[r][c].isMine) {
       // Reveal all mines
       newGrid.forEach(row => row.forEach(cell => { if (cell.isMine) cell.isRevealed = true; }));
@@ -141,7 +142,7 @@ export default function Minesweeper() {
       '?' are hidden cells, numbers are neighbor counts. 
       Give me a strategic scan report. Which area looks safest or most dangerous? 
       Keep it very short (max 1 sentence).`;
-      
+
       const response = await getLlmResponse(prompt, apiKeys, selectedLlm, "You are a Minesweeper tactical advisor.", 'minesweeper');
       if (!isMounted.current) return;
       setAiScanResult(response);
@@ -188,7 +189,7 @@ export default function Minesweeper() {
             <Bomb className="w-5 h-5" />
             <span className="font-semibold">{mineCount} Mines</span>
           </div>
-          <button 
+          <button
             onClick={runAiScan}
             disabled={isAiThinking || gameOver}
             className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg border border-indigo-500/20 transition-all text-xs font-bold uppercase tracking-wider"
@@ -224,14 +225,14 @@ export default function Minesweeper() {
               onClick={() => revealCell(r, c)}
               onContextMenu={(e) => toggleFlag(e, r, c)}
               className={`w-8 h-8 sm:w-10 sm:h-10 rounded-sm flex items-center justify-center text-sm font-bold transition-all
-                ${cell.isRevealed 
-                  ? (cell.isMine ? 'bg-rose-500 text-white' : 'bg-slate-900 text-slate-400') 
+                ${cell.isRevealed
+                  ? (cell.isMine ? 'bg-rose-500 text-white' : 'bg-slate-900 text-slate-400')
                   : 'bg-slate-700 hover:bg-slate-600 text-transparent'}
                 ${!cell.isRevealed && cell.isFlagged ? 'text-indigo-400' : ''}
               `}
             >
-              {cell.isRevealed 
-                ? (cell.isMine ? <Bomb className="w-4 h-4" /> : (cell.neighborCount > 0 ? cell.neighborCount : '')) 
+              {cell.isRevealed
+                ? (cell.isMine ? <Bomb className="w-4 h-4" /> : (cell.neighborCount > 0 ? cell.neighborCount : ''))
                 : (cell.isFlagged ? <Flag className="w-4 h-4 fill-current" /> : '')}
             </button>
           )))}
@@ -249,9 +250,12 @@ export default function Minesweeper() {
               <p className="text-sm text-rose-200">{funnyTask}</p>
             </div>
           )}
-          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-6 py-3 bg-indigo-500 text-white rounded-xl font-bold">
-            <RefreshCw className="w-5 h-5" /> Try Again
-          </button>
+          <ShareButtons
+            gameTitle="Minesweeper"
+            result={winner ? 'cleared the minefield with precision' : 'stepped on a hidden mine'}
+            penalty={funnyTask}
+            onPlayAgain={initGame}
+          />
         </motion.div>
       )}
     </div>

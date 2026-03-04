@@ -1,324 +1,203 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useStore } from '../store/useStore';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useStore, LlmProvider } from '../store/useStore';
 import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
-import { RefreshCw, Trophy, Frown, Send, AlertCircle } from 'lucide-react';
-import ShareButton from '../components/ShareButton';
+import { RefreshCw, Trophy, Skull, Send, Keyboard, Activity, Sparkles, BrainCircuit, History } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
-interface WordEntry {
-  word: string;
-  player: 'user' | 'ai';
-}
-
+// --- Component ---
 export default function WordChain() {
-  const [words, setWords] = useState<WordEntry[]>([]);
-  const [inputWord, setInputWord] = useState('');
-  const [isUserTurn, setIsUserTurn] = useState(true);
-  const [winner, setWinner] = useState<'user' | 'ai' | null>(null);
+  const [chain, setChain] = useState<string[]>([]);
+  const [input, setInput] = useState('');
+  const [turn, setTurn] = useState<'player' | 'ai'>('player');
+  const [gameOver, setGameOver] = useState(false);
+  const [winner, setWinner] = useState<'player' | 'ai' | null>(null);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [funnyTask, setFunnyTask] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  
-  const { apiKeys, selectedLlm, user, gameSessionTokens, resetSessionTokens } = useStore();
-  const endOfListRef = useRef<HTMLDivElement>(null);
+  const [score, setScore] = useState(0);
+
+  const { apiKeys, selectedLlm, player1Llm, gameMode, user, gameSessionTokens, resetSessionTokens } = useStore();
   const isMounted = useRef(true);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const initGame = useCallback(() => {
+    setChain(['START']);
+    setTurn('player');
+    setGameOver(false);
+    setScore(0);
+    setWinner(null);
+    setFunnyTask(null);
+    resetSessionTokens();
+  }, [resetSessionTokens]);
 
   useEffect(() => {
     isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+    initGame();
+    return () => { isMounted.current = false; };
+  }, [initGame]);
 
-  useEffect(() => {
-    endOfListRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [words]);
-
-  useEffect(() => {
-    if (!isUserTurn && !winner) {
-      makeAiMove();
-    }
-  }, [isUserTurn, winner]);
-
-  const handleWin = async (result: 'user' | 'ai') => {
-    if (!isMounted.current) return;
-    setWinner(result);
-    let task = null;
-    
-    if (result === 'ai' && apiKeys[selectedLlm]) {
-      task = await generateFunnyTask(selectedLlm, apiKeys, 'Word Chain');
-      if (!isMounted.current) return;
-      setFunnyTask(task);
-    }
-
-    if (user && isMounted.current) {
-      try {
-        await fetchApi('/history', {
-          method: 'POST',
-          body: JSON.stringify({
-            game_id: 'wordchain',
-            winner: result,
-            funny_task: task,
-            total_tokens: gameSessionTokens
-          })
-        });
-      } catch (err) {
-        console.error('Failed to save game result:', err);
-      }
-    }
-  };
-
-  const validateWord = (word: string): string | null => {
-    const cleanWord = word.trim().toLowerCase();
-    
-    if (!cleanWord) return 'Please enter a word.';
-    if (!/^[a-z]+$/.test(cleanWord)) return 'Words can only contain letters.';
-    if (cleanWord.length < 3) return 'Word must be at least 3 letters long.';
-    
-    if (words.length > 0) {
-      const lastWord = words[words.length - 1].word;
-      const expectedLetter = lastWord[lastWord.length - 1];
-      
-      if (cleanWord[0] !== expectedLetter) {
-        return `Word must start with '${expectedLetter.toUpperCase()}'.`;
-      }
-      
-      if (words.some(w => w.word === cleanWord)) {
-        return 'That word has already been used!';
-      }
-    }
-    
-    return null;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handlePlayerMove = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isUserTurn || winner || isAiThinking) return;
+    const word = input.trim().toUpperCase();
+    if (!word || gameOver || isAiThinking || turn !== 'player') return;
 
-    const validationError = validateWord(inputWord);
-    if (validationError) {
-      setError(validationError);
+    const lastWord = chain[chain.length - 1];
+    const lastChar = lastWord[lastWord.length - 1];
+
+    if (word[0] !== lastChar) {
+      alert(`Must start with "${lastChar}"`);
       return;
     }
 
-    setError(null);
-    const newWord = inputWord.trim().toLowerCase();
-    setWords([...words, { word: newWord, player: 'user' }]);
-    setInputWord('');
-    setIsUserTurn(false);
+    if (chain.includes(word)) {
+      alert('Word already used!');
+      return;
+    }
+
+    const newChain = [...chain, word];
+    setChain(newChain);
+    setScore(s => s + word.length);
+    setInput('');
+    setTurn('ai');
   };
 
-  const makeAiMove = async () => {
-    if (!apiKeys[selectedLlm] || !isMounted.current) return;
+  const makeAiMove = async (llm: LlmProvider) => {
+    if (gameOver || !isMounted.current) return;
     setIsAiThinking(true);
 
-    try {
-      const lastWord = words[words.length - 1].word;
-      const startingLetter = lastWord[lastWord.length - 1];
-      const usedWords = words.map(w => w.word);
-      
-      const systemInstruction = `You are playing a Word Chain game. The user just played "${lastWord}". You must respond with a valid English word that starts with the letter "${startingLetter}". The word must be at least 3 letters long. You CANNOT use any of these previously used words: ${usedWords.join(', ')}. Return ONLY a JSON object with a single key 'word' containing your chosen word. If you cannot think of a word, return {"word": "GIVE_UP"}.`;
-      
-      const response = await generateNextMove(selectedLlm, apiKeys, 'wordchain', { lastWord, usedWords }, systemInstruction);
-      
-      if (!isMounted.current) return;
+    const lastWord = chain[chain.length - 1];
+    const lastChar = lastWord[lastWord.length - 1];
 
-      if (response && response.word) {
-        const aiWord = response.word.toLowerCase();
-        
-        if (aiWord === 'give_up') {
-          handleWin('user');
-        } else {
-          setWords(prev => [...prev, { word: aiWord, player: 'ai' }]);
-          setIsUserTurn(true);
-        }
-      } else {
-        throw new Error("Invalid AI response");
-      }
-    } catch (error) {
-      if (!isMounted.current) return;
-      console.error('AI move failed:', error);
-      // If AI fails, user wins
-      handleWin('user');
-    } finally {
+    try {
+      const systemInstruction = `You are a Word Chain expert.
+            The current word is "${lastWord}". You must provide ONE word starting with "${lastChar}".
+            Chain history: ${chain.join(', ')}
+            Return ONLY a JSON object: {"word": "EXAMPLE"}`;
+
+      const response = await generateNextMove(llm, apiKeys, 'wordchain', { chain }, systemInstruction);
+
       if (isMounted.current) {
-        setIsAiThinking(false);
+        const aiWord = response?.word?.toUpperCase();
+        if (aiWord && !chain.includes(aiWord) && aiWord[0] === lastChar) {
+          setChain(prev => [...prev, aiWord]);
+          setTurn('player');
+        } else {
+          finishGame('player'); // AI failed or repeated
+        }
       }
+    } catch (e) {
+      console.error(e);
+      if (isMounted.current) finishGame('player');
+    } finally {
+      if (isMounted.current) setIsAiThinking(false);
     }
   };
 
-  const resetGame = () => {
-    setWords([]);
-    setInputWord('');
-    setIsUserTurn(true);
-    setWinner(null);
-    setFunnyTask(null);
-    setError(null);
-    resetSessionTokens();
+  useEffect(() => {
+    if (turn === 'ai' && !gameOver) {
+      setTimeout(() => makeAiMove(selectedLlm as LlmProvider), 1000);
+    }
+  }, [turn, gameOver]);
+
+  const finishGame = async (gameWinner: 'player' | 'ai') => {
+    setGameOver(true);
+    setWinner(gameWinner);
+    let task = null;
+    if (gameWinner === 'ai' && apiKeys[selectedLlm]) {
+      task = await generateFunnyTask(selectedLlm, apiKeys, 'Word Chain');
+      setFunnyTask(task);
+    }
+    if (user && isMounted.current) {
+      await fetchApi('/history', {
+        method: 'POST',
+        body: JSON.stringify({ game_id: 'wordchain', winner: gameWinner, funny_task: task, total_tokens: gameSessionTokens })
+      });
+    }
   };
 
   return (
-    <div className="flex flex-col items-center max-w-2xl mx-auto">
-      <div className="mb-8 flex items-center gap-8 text-center w-full justify-center">
-        <div className={`p-4 rounded-2xl border transition-colors ${isUserTurn && !winner ? 'bg-indigo-500/20 border-indigo-500/50' : 'bg-slate-800 border-white/10'}`}>
-          <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider mb-1">You</p>
-          <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-xl">
-            {words.filter(w => w.player === 'user').length}
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex flex-wrap justify-between items-center bg-slate-900 p-6 rounded-3xl border border-white/5 shadow-2xl">
+        <div className="flex gap-8">
+          <div className="text-center">
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Lexicon Score</p>
+            <p className="text-2xl font-black text-indigo-400">{score}</p>
           </div>
         </div>
-        <div className="text-2xl font-bold text-slate-500">VS</div>
-        <div className={`p-4 rounded-2xl border transition-colors ${!isUserTurn && !winner ? 'bg-emerald-500/20 border-emerald-500/50' : 'bg-slate-800 border-white/10'}`}>
-          <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider mb-1">AI</p>
-          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xl">
-            {words.filter(w => w.player === 'ai').length}
+        <div className="flex items-center gap-4">
+          <div className={`px-4 py-2 rounded-xl border flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter ${turn === 'player' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'}`}>
+            {turn === 'player' ? <Sparkles className="w-3 h-3" /> : <BrainCircuit className="w-3 h-3 animate-pulse" />}
+            {turn === 'player' ? 'Your Turn' : 'AI Thinking'}
+          </div>
+          <button onClick={initGame} className="p-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl border border-white/5"><RefreshCw className="w-5 h-5" /></button>
+        </div>
+      </div>
+
+      <div className="bg-slate-950 rounded-[40px] border border-white/10 p-8 sm:p-12 min-h-[500px] flex flex-col shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
+
+        {/* Visual Chain */}
+        <div className="flex-1 flex flex-wrap gap-3 items-center justify-center p-4">
+          {chain.map((word, i) => (
+            <motion.div
+              key={i}
+              initial={{ scale: 0, opacity: 0, x: -20 }}
+              animate={{ scale: 1, opacity: 1, x: 0 }}
+              className={`px-6 py-3 rounded-2xl border-2 flex items-center gap-3 shadow-lg
+                                ${i === chain.length - 1 ? 'bg-indigo-500 border-indigo-400 text-white scale-110 z-10' : 'bg-slate-900 border-white/5 text-slate-400 opacity-60'}`}
+            >
+              <span className="font-mono text-xs opacity-30">#{i}</span>
+              <span className="font-black tracking-widest">{word}</span>
+              {i < chain.length - 1 && <div className="w-2 h-2 rounded-full bg-indigo-500/20" />}
+            </motion.div>
+          ))}
+          {isAiThinking && (
+            <div className="flex gap-2 p-3 bg-white/5 rounded-2xl animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-slate-700" />
+              <span className="w-2 h-2 rounded-full bg-slate-700" />
+            </div>
+          )}
+        </div>
+
+        <div className="mt-auto space-y-6 flex flex-col items-center">
+          <div className="w-full max-w-md relative">
+            <form onSubmit={handlePlayerMove} className="relative">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                disabled={turn === 'ai' || gameOver}
+                placeholder={`Type a word starting with "${chain[chain.length - 1]?.[chain[chain.length - 1].length - 1] || '?'}"...`}
+                className="w-full bg-slate-900 border-2 border-white/5 rounded-2xl px-8 py-5 text-xl text-white placeholder-slate-700 focus:outline-none focus:border-indigo-500 transition-all font-black uppercase"
+              />
+              <button type="submit" disabled={turn === 'ai' || gameOver || !input.trim()} className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-800 text-white rounded-xl transition-all"><Send className="w-5 h-5" /></button>
+            </form>
+          </div>
+
+          <div className="flex items-center gap-2 text-slate-600 text-[10px] uppercase font-black tracking-widest">
+            <History className="w-3 h-3" />
+            Sequence Trace Active
           </div>
         </div>
       </div>
 
-      <div className="w-full bg-slate-950 border border-white/10 rounded-3xl p-4 sm:p-6 shadow-inner min-h-[300px] max-h-[400px] overflow-y-auto mb-6 flex flex-col gap-3">
-        {words.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center text-slate-500 text-center">
-            <p>You go first! Enter any word to start the chain.</p>
-          </div>
-        ) : (
-          <AnimatePresence initial={false}>
-            {words.map((entry, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                className={`flex ${entry.player === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`px-4 py-3 rounded-2xl max-w-[80%] ${
-                  entry.player === 'user' 
-                    ? 'bg-indigo-600 text-white rounded-tr-sm' 
-                    : 'bg-slate-800 text-slate-200 rounded-tl-sm border border-white/5'
-                }`}>
-                  <span className="text-lg font-medium tracking-wide">
-                    {entry.word.split('').map((char, i) => (
-                      <span key={i} className={
-                        (index > 0 && i === 0) || (i === entry.word.length - 1) 
-                          ? 'font-bold text-amber-300' 
-                          : ''
-                      }>
-                        {char}
-                      </span>
-                    ))}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        )}
-        
-        {isAiThinking && !winner && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex justify-start"
-          >
-            <div className="px-4 py-3 rounded-2xl bg-slate-800 text-slate-400 rounded-tl-sm border border-white/5 flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 animate-spin" />
-              <span className="text-sm">Thinking...</span>
+      <AnimatePresence>
+        {gameOver && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-8 text-center">
+            <div className="space-y-8 max-w-sm w-full">
+              {winner === 'player' ? <Trophy className="w-24 h-24 text-emerald-400 mx-auto" /> : <Skull className="w-24 h-24 text-rose-500 mx-auto" />}
+              <h2 className="text-5xl font-black text-white italic tracking-tighter uppercase">{winner === 'player' ? 'VOCAB_MASTER' : 'CHAIN_BROKEN'}</h2>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{winner === 'player' ? 'The AI was unable to find a continuation.' : 'You broke the sequence or repeated a word.'}</p>
+              <div className="space-y-4 pt-4">
+                <ShareButtons gameTitle="Word Chain" result={winner === 'player' ? 'defeated the linguistic engine' : 'was outmatched in word play'} score={score} />
+                <button onClick={initGame} className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-3xl font-black text-xl shadow-xl transition-all">NEW VOCAB SESSION</button>
+              </div>
             </div>
           </motion.div>
         )}
-        <div ref={endOfListRef} />
-      </div>
-
-      {!winner ? (
-        <form onSubmit={handleSubmit} className="w-full space-y-3">
-          {error && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 text-rose-400 text-sm px-2"
-            >
-              <AlertCircle className="w-4 h-4" />
-              <span>{error}</span>
-            </motion.div>
-          )}
-          
-          <div className="relative flex items-center">
-            {words.length > 0 && (
-              <div className="absolute left-4 w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center font-bold text-amber-400 border border-white/10">
-                {words[words.length - 1].word.slice(-1).toUpperCase()}
-              </div>
-            )}
-            
-            <input
-              type="text"
-              value={inputWord}
-              onChange={(e) => {
-                setInputWord(e.target.value);
-                setError(null);
-              }}
-              disabled={!isUserTurn || isAiThinking}
-              placeholder={words.length === 0 ? "Enter a starting word..." : "Type your word..."}
-              className={`w-full bg-slate-900 border border-white/10 rounded-2xl py-4 pr-14 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all ${
-                words.length > 0 ? 'pl-16' : 'pl-6'
-              }`}
-              autoFocus
-            />
-            
-            <button
-              type="submit"
-              disabled={!inputWord.trim() || !isUserTurn || isAiThinking}
-              className="absolute right-2 p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </div>
-          
-          <div className="flex justify-between px-2 text-xs text-slate-500">
-            <span>Min 3 letters</span>
-            <button 
-              type="button" 
-              onClick={() => handleWin('ai')}
-              className="hover:text-rose-400 transition-colors"
-            >
-              I give up!
-            </button>
-          </div>
-        </form>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full text-center space-y-4"
-        >
-          <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-xl shadow-lg ${
-            winner === 'user' ? 'bg-indigo-500 text-white shadow-indigo-500/25' :
-            'bg-rose-500 text-white shadow-rose-500/25'
-          }`}>
-            {winner === 'user' ? <><Trophy className="w-6 h-6" /> You Win!</> :
-             <><Frown className="w-6 h-6" /> AI Wins!</>}
-          </div>
-
-          {funnyTask && (
-            <div className="p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl mt-6">
-              <p className="text-sm text-rose-400 font-bold uppercase tracking-widest mb-2">Penalty Task</p>
-              <p className="text-lg font-medium text-rose-100">{funnyTask}</p>
-            </div>
-          )}
-
-          <div className="flex gap-4 justify-center mt-6">
-            <button
-              onClick={resetGame}
-              className="px-8 py-4 bg-white text-slate-950 hover:bg-slate-200 rounded-2xl font-bold transition-colors flex items-center justify-center gap-2 shadow-xl"
-            >
-              <RefreshCw className="w-5 h-5" />
-              Play Again
-            </button>
-            <ShareButton 
-              gameTitle="Word Chain" 
-              winner={winner} 
-              funnyTask={funnyTask} 
-            />
-          </div>
-        </motion.div>
-      )}
+      </AnimatePresence>
     </div>
   );
 }

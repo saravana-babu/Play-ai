@@ -4,6 +4,7 @@ import { fetchApi } from '../lib/api';
 import { generateFunnyTask } from '../lib/ai';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type Grid = number[][];
 
@@ -99,7 +100,7 @@ export default function Game2048() {
       const gridWithNewTile = addRandomTile(newGrid);
       setGrid(gridWithNewTile);
       setScore(newScore);
-      
+
       // Check game over
       if (isGameOver(gridWithNewTile)) {
         setGameOver(true);
@@ -188,7 +189,7 @@ export default function Game2048() {
             <div key={`${r}-${c}`} className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-900/50 rounded-lg" />
           )))}
         </div>
-        
+
         <div className="absolute inset-3 grid grid-cols-4 gap-3">
           <AnimatePresence>
             {grid.map((row, r) => row.map((cell, c) => cell !== 0 && (
@@ -210,7 +211,13 @@ export default function Game2048() {
             <Trophy className="w-16 h-16 text-yellow-400 mb-4" />
             <h3 className="text-3xl font-bold text-white mb-2">Game Over!</h3>
             <p className="text-slate-400 mb-6">Final Score: {score}</p>
-            <button onClick={initGame} className="px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-colors">
+            <ShareButtons
+              gameTitle="2048"
+              result={score >= 2048 ? 'reached the legendary 2048 tile' : `reached a score of ${score}`}
+              score={score}
+              penalty={funnyTask}
+            />
+            <button onClick={initGame} className="px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-colors mt-4">
               Try Again
             </button>
           </motion.div>

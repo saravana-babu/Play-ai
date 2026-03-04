@@ -4,6 +4,7 @@ import { generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Frown, Timer, CheckCircle2, XCircle } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 interface Problem {
   text: string;
@@ -121,7 +122,7 @@ export default function MathQuiz() {
       {!gameOver ? (
         <div className="w-full space-y-8">
           <div className="text-center">
-            <motion.h2 
+            <motion.h2
               key={problem?.text}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -138,9 +139,9 @@ export default function MathQuiz() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className={`w-full bg-slate-950 border-2 rounded-2xl px-6 py-4 text-3xl text-center font-bold text-white focus:outline-none transition-all
-                ${feedback === 'correct' ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 
-                  feedback === 'wrong' ? 'border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.2)]' : 
-                  'border-white/10 focus:border-indigo-500'}
+                ${feedback === 'correct' ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]' :
+                  feedback === 'wrong' ? 'border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.2)]' :
+                    'border-white/10 focus:border-indigo-500'}
               `}
               placeholder="?"
             />
@@ -176,7 +177,13 @@ export default function MathQuiz() {
             </div>
           )}
 
-          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all">
+          <ShareButtons
+            gameTitle="Math Quiz"
+            result={`solved ${score} equations`}
+            score={score}
+            penalty={funnyTask}
+          />
+          <button onClick={initGame} className="flex items-center gap-2 mx-auto px-10 py-4 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all mt-4">
             <RefreshCw className="w-5 h-5" /> Try Again
           </button>
         </motion.div>

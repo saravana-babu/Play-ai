@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, BrainCircuit, HelpCircle, Key } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type Clue = { number: number; direction: 'across' | 'down'; clue: string; answer: string; row: number; col: number };
 
@@ -82,7 +83,7 @@ export default function Crossword() {
   const handleCharChange = (r: number, c: number, value: string) => {
     const upperValue = value.toUpperCase();
     if (upperValue.length > 1) return;
-    
+
     const newUserGrid = [...userGrid];
     newUserGrid[r][c] = upperValue;
     setUserGrid(newUserGrid);
@@ -213,9 +214,15 @@ export default function Crossword() {
                 <p className="text-slate-400">Great job decoding the crossword.</p>
               </div>
 
+              <ShareButtons
+                gameTitle="Crossword"
+                result="solved the grid"
+                score={score}
+                penalty={funnyTask}
+              />
               <button
                 onClick={generateCrossword}
-                className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all"
+                className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all mt-4"
               >
                 Play Again
               </button>
@@ -229,7 +236,7 @@ export default function Crossword() {
         <div className="space-y-1">
           <p className="text-sm text-white font-bold">How to Play</p>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Fill in the white squares with letters to form words based on the clues provided. 
+            Fill in the white squares with letters to form words based on the clues provided.
             Numbers in the squares correspond to the clue numbers. Click "Check Solution" when you're done!
           </p>
         </div>

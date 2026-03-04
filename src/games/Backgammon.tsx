@@ -4,6 +4,7 @@ import { generateNextMove, generateFunnyTask } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Skull, BrainCircuit, HelpCircle, Dices } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 type BoardState = number[]; // 24 points, positive for player, negative for AI
 
@@ -49,7 +50,7 @@ export default function Backgammon() {
 
   const handleMove = (from: number, to: number) => {
     if (turn !== 'player' || dice[0] === 0 || gameOver || loading) return;
-    
+
     const dist = to - from;
     if (dice.includes(dist)) {
       const newBoard = [...board];
@@ -57,11 +58,11 @@ export default function Backgammon() {
         newBoard[from]--;
         newBoard[to]++;
         setBoard(newBoard);
-        
+
         const newDice = [...dice];
         newDice.splice(newDice.indexOf(dist), 1);
         setDice(newDice);
-        
+
         if (newDice.length === 0) {
           setTurn('ai');
           setTimeout(handleAiMove, 1000);
@@ -78,7 +79,7 @@ export default function Backgammon() {
     try {
       const d1 = Math.floor(Math.random() * 6) + 1;
       const d2 = Math.floor(Math.random() * 6) + 1;
-      
+
       const systemInstruction = `You are a Backgammon Expert. 
       Board State: ${JSON.stringify(board)}
       AI rolled: ${d1}, ${d2}
@@ -145,8 +146,8 @@ export default function Backgammon() {
           </div>
         </div>
         <div className="flex gap-4">
-          <button 
-            onClick={rollDice} 
+          <button
+            onClick={rollDice}
             disabled={dice[0] !== 0 || turn !== 'player' || gameOver || loading}
             className="flex items-center gap-2 px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition-all disabled:opacity-50"
           >
@@ -188,7 +189,12 @@ export default function Backgammon() {
             >
               <div className="text-center space-y-8 max-w-md">
                 <h2 className="text-4xl font-black text-white">Game Over</h2>
-                <button onClick={initGame} className="w-full py-4 bg-indigo-500 text-white rounded-2xl font-bold">Play Again</button>
+                <ShareButtons
+                  gameTitle="Backgammon"
+                  result="played a classic match"
+                  penalty={funnyTask}
+                />
+                <button onClick={initGame} className="w-full py-4 bg-indigo-500 text-white rounded-2xl font-bold mt-4">Play Again</button>
               </div>
             </motion.div>
           )}
@@ -200,7 +206,7 @@ export default function Backgammon() {
         <div className="space-y-1">
           <p className="text-sm text-white font-bold">How to Play</p>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Roll the dice and move your pieces (indigo) towards the end of the board. 
+            Roll the dice and move your pieces (indigo) towards the end of the board.
             AI moves the emerald pieces. This is a simplified version where you click points to move.
           </p>
         </div>

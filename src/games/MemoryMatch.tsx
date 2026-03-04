@@ -4,6 +4,7 @@ import { generateFunnyTask, getLlmResponse } from '../lib/ai';
 import { fetchApi } from '../lib/api';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw, Trophy, Brain, Sparkles, Loader2 } from 'lucide-react';
+import ShareButtons from '../components/ShareButtons';
 
 const ICONS = ['🌟', '🍎', '🚀', '🎸', '🍦', '🎮', '🌈', '🐱', '🍕', '⚽', '💎', '🎨'];
 
@@ -86,7 +87,7 @@ export default function MemoryMatch() {
       The icons are: ${ICONS.join(', ')}. 
       Give me a funny or encouraging "Memory Boost" tip to help me find the pairs. 
       Keep it very short (max 1 sentence).`;
-      
+
       const response = await getLlmResponse(prompt, apiKeys, selectedLlm, "You are a memory coach.", 'memory');
       if (!isMounted.current) return;
       setAiMessage(response);
@@ -125,7 +126,7 @@ export default function MemoryMatch() {
             <Brain className="w-5 h-5" />
             <span className="font-semibold">Moves: {moves}</span>
           </div>
-          <button 
+          <button
             onClick={getAiMemoryBoost}
             disabled={isAiThinking || gameOver}
             className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg border border-indigo-500/20 transition-all text-xs font-bold uppercase tracking-wider"
@@ -161,8 +162,8 @@ export default function MemoryMatch() {
             whileTap={{ scale: 0.95 }}
             onClick={() => handleCardClick(index)}
             className={`w-16 h-20 sm:w-20 sm:h-28 rounded-xl border-2 transition-all flex items-center justify-center text-3xl
-              ${card.flipped || card.matched 
-                ? 'bg-slate-800 border-indigo-500/50 rotate-y-180' 
+              ${card.flipped || card.matched
+                ? 'bg-slate-800 border-indigo-500/50 rotate-y-180'
                 : 'bg-slate-900 border-white/10 hover:border-white/20'}
               ${card.matched ? 'opacity-50 grayscale-[0.5]' : ''}
             `}
@@ -180,7 +181,12 @@ export default function MemoryMatch() {
               <h3 className="text-2xl font-bold">Memory Master!</h3>
               <p className="text-sm opacity-80">Completed in {moves} moves</p>
             </div>
-            <div>
+            <ShareButtons
+              gameTitle="Memory Match"
+              result={`found all pairs in ${moves} moves`}
+              score={moves}
+            />
+            <div className="mt-4">
               <button onClick={initGame} className="px-8 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 transition-colors">
                 Play Again
               </button>

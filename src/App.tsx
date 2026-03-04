@@ -1,6 +1,6 @@
 /**
  * @license
- * SPDX-License-Identifier: Apache-2.0
+ * MIT
  */
 
 import React from 'react';

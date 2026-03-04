@@ -14,24 +14,13 @@ import Trivia from '../games/Trivia';
 import MathQuiz from '../games/MathQuiz';
 import SimonSays from '../games/SimonSays';
 import EmojiCharades from '../games/EmojiCharades';
-import Pong from '../games/Pong';
-import FlappyBird from '../games/FlappyBird';
 import Wordle from '../games/Wordle';
-import ReactionTime from '../games/ReactionTime';
-import TypingTest from '../games/TypingTest';
-import ColorblindTest from '../games/ColorblindTest';
 import Mastermind from '../games/Mastermind';
 import Anagrams from '../games/Anagrams';
 import Nim from '../games/Nim';
 import DotsAndBoxes from '../games/DotsAndBoxes';
-import AimTrainer from '../games/AimTrainer';
 import WordSearch from '../games/WordSearch';
 import SlidingPuzzle from '../games/SlidingPuzzle';
-import ChimpTest from '../games/ChimpTest';
-import VisualMemory from '../games/VisualMemory';
-import SequenceMemory from '../games/SequenceMemory';
-import NumberMemory from '../games/NumberMemory';
-import VerbalMemory from '../games/VerbalMemory';
 import Chess from '../games/Chess';
 import Mancala from '../games/Mancala';
 import Battleship from '../games/Battleship';
@@ -43,9 +32,36 @@ import Cryptogram from '../games/Cryptogram';
 import Crossword from '../games/Crossword';
 import Boggle from '../games/Boggle';
 import SpatialReasoning from '../games/SpatialReasoning';
+import CircuitMapping from '../games/CircuitMapping';
+import PlantGrowth from '../games/PlantGrowth';
+import NetworkRouting from '../games/NetworkRouting';
+import CryptoMarket from '../games/CryptoMarket';
+import QuantumLogic from '../games/QuantumLogic';
+import SqlMystery from '../games/SqlMystery';
+import AlgorithmAssembly from '../games/AlgorithmAssembly';
+import NeuralArchitect from '../games/NeuralArchitect';
+import PhysicsDrop from '../games/PhysicsDrop';
+import DataStructureFlow from '../games/DataStructureFlow';
 import Scrabble from '../games/Scrabble';
 import Backgammon from '../games/Backgammon';
-import DinosaurRun from '../games/DinosaurRun';
+import StoryTeller from '../games/StoryTeller';
+import WiringConnection from '../games/WiringConnection';
+import Blackjack from '../games/Blackjack';
+import War from '../games/War';
+import Baccarat from '../games/Baccarat';
+import Poker from '../games/Poker';
+import Solitaire from '../games/Solitaire';
+import CyberDefense from '../games/CyberDefense';
+import Mahjong from '../games/Mahjong';
+import MLTuning from '../games/MLTuning';
+import Genetic from '../games/Genetic';
+import RobotPath from '../games/RobotPath';
+import LogicEvaluator from '../games/LogicEvaluator';
+import CircuitConnector from '../games/CircuitConnector';
+import TuringMachine from '../games/TuringMachine';
+import AIKnowledge from '../games/AIKnowledge';
+import RegexGolf from '../games/RegexGolf';
+import MazeSolver from '../games/MazeSolver';
 import GenericAIGame from '../games/GenericAIGame';
 import TokenLogViewer from '../components/TokenLogViewer';
 import { ArrowLeft, AlertCircle, BrainCircuit } from 'lucide-react';
@@ -53,7 +69,7 @@ import { motion } from 'motion/react';
 
 export default function Game() {
   const { id } = useParams<{ id: string }>();
-  const { user, apiKeys, selectedLlm, setSelectedLlm, resetSessionTokens } = useStore();
+  const { user, apiKeys, selectedLlm, setSelectedLlm, player1Llm, setPlayer1Llm, gameMode, setGameMode, resetSessionTokens } = useStore();
   const navigate = useNavigate();
   const [gameKey, setGameKey] = useState(0);
 
@@ -62,9 +78,9 @@ export default function Game() {
       resetSessionTokens();
     };
   }, [resetSessionTokens]);
-  
+
   const game = GAMES.find((g) => g.id === id);
-  const hasAnyKey = !!(apiKeys.gemini || apiKeys.openai || apiKeys.anthropic);
+  const hasAnyKey = !!(apiKeys.gemini || apiKeys.openai || apiKeys.anthropic || apiKeys.deepseek || apiKeys.groq);
 
   useEffect(() => {
     if (!user) {
@@ -79,6 +95,16 @@ export default function Game() {
     if (newLlm !== selectedLlm) {
       if (window.confirm('Changing the AI provider will restart the current game. Are you sure?')) {
         setSelectedLlm(newLlm);
+        setGameKey(prev => prev + 1); // Force re-render of the game component
+      }
+    }
+  };
+
+  const handleLlm1Change = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newLlm = e.target.value as LlmProvider;
+    if (newLlm !== player1Llm) {
+      if (window.confirm('Changing the AI provider will restart the current game. Are you sure?')) {
+        setPlayer1Llm(newLlm);
         setGameKey(prev => prev + 1); // Force re-render of the game component
       }
     }
@@ -136,38 +162,16 @@ export default function Game() {
         return <SimonSays key={gameKey} />;
       case 'emojicharades':
         return <EmojiCharades key={gameKey} />;
-      case 'pong':
-        return <Pong key={gameKey} />;
-      case 'flappybird':
-        return <FlappyBird key={gameKey} />;
       case 'wordle':
         return <Wordle key={gameKey} />;
-      case 'reaction':
-        return <ReactionTime key={gameKey} />;
-      case 'typing':
-        return <TypingTest key={gameKey} />;
-      case 'colorblind':
-        return <ColorblindTest key={gameKey} />;
       case 'mastermind':
         return <Mastermind key={gameKey} />;
       case 'anagrams':
         return <Anagrams key={gameKey} />;
-      case 'aimtrainer':
-        return <AimTrainer key={gameKey} />;
       case 'wordsearch':
         return <WordSearch key={gameKey} />;
       case 'slidingpuzzle':
         return <SlidingPuzzle key={gameKey} />;
-      case 'chimp':
-        return <ChimpTest key={gameKey} />;
-      case 'visualmemory':
-        return <VisualMemory key={gameKey} />;
-      case 'sequence':
-        return <SequenceMemory key={gameKey} />;
-      case 'numbermemory':
-        return <NumberMemory key={gameKey} />;
-      case 'verbalmemory':
-        return <VerbalMemory key={gameKey} />;
       case 'nim':
         return <Nim key={gameKey} />;
       case 'dots':
@@ -198,8 +202,62 @@ export default function Game() {
         return <Scrabble key={gameKey} />;
       case 'backgammon':
         return <Backgammon key={gameKey} />;
-      case 'dinosaur':
-        return <DinosaurRun key={gameKey} />;
+      case 'circuitmapping':
+        return <CircuitMapping key={gameKey} />;
+      case 'plantgrowth':
+        return <PlantGrowth key={gameKey} />;
+      case 'networkrouting':
+        return <NetworkRouting key={gameKey} />;
+      case 'cryptocurrency':
+        return <CryptoMarket key={gameKey} />;
+      case 'quantumlogic':
+        return <QuantumLogic key={gameKey} />;
+      case 'sqlmystery':
+        return <SqlMystery key={gameKey} />;
+      case 'algorithmassembly':
+        return <AlgorithmAssembly key={gameKey} />;
+      case 'neuralnetwork':
+        return <NeuralArchitect key={gameKey} />;
+      case 'physicsdrop':
+        return <PhysicsDrop key={gameKey} />;
+      case 'datastructure':
+        return <DataStructureFlow key={gameKey} />;
+      case 'storyteller':
+        return <StoryTeller key={gameKey} />;
+      case 'wiring':
+        return <WiringConnection key={gameKey} />;
+      case 'blackjack':
+        return <Blackjack key={gameKey} />;
+      case 'war':
+        return <War key={gameKey} />;
+      case 'baccarat':
+        return <Baccarat key={gameKey} />;
+      case 'poker':
+        return <Poker key={gameKey} />;
+      case 'solitaire':
+        return <Solitaire key={gameKey} />;
+      case 'cybersecurity':
+        return <CyberDefense key={gameKey} />;
+      case 'mahjong':
+        return <Mahjong key={gameKey} />;
+      case 'mlhyperparameter':
+        return <MLTuning key={gameKey} />;
+      case 'genetic':
+        return <Genetic key={gameKey} />;
+      case 'robotpath':
+        return <RobotPath key={gameKey} />;
+      case 'logicevaluation':
+        return <LogicEvaluator key={gameKey} />;
+      case 'mazesolver':
+        return <MazeSolver key={gameKey} />;
+      case 'circuitconnector':
+        return <CircuitConnector key={gameKey} />;
+      case 'turingmachine':
+        return <TuringMachine key={gameKey} />;
+      case 'aiknowledge':
+        return <AIKnowledge key={gameKey} />;
+      case 'regexgolf':
+        return <RegexGolf key={gameKey} />;
       default:
         return <GenericAIGame key={gameKey} />;
     }
@@ -221,17 +279,56 @@ export default function Game() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-900 border border-white/10 rounded-xl px-3 py-2">
-          <BrainCircuit className="w-4 h-4 text-indigo-400" />
-          <select
-            value={selectedLlm}
-            onChange={handleLlmChange}
-            className="bg-transparent text-sm text-white font-medium focus:outline-none cursor-pointer"
+        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 mt-4 sm:mt-0">
+          {gameMode === 'llm-vs-llm' && (
+            <div className="flex items-center gap-2 bg-slate-900 border border-white/10 rounded-xl px-3 py-2">
+              <span className="text-xs text-indigo-400 font-bold pr-2 border-r border-white/10">Player 1</span>
+              <BrainCircuit className="w-4 h-4 text-indigo-400" />
+              <select
+                value={player1Llm}
+                onChange={handleLlm1Change}
+                className="bg-transparent text-xs sm:text-sm text-white font-bold focus:outline-none cursor-pointer hover:text-indigo-400 transition-colors"
+              >
+                <option value="gemini" disabled={!apiKeys.gemini} className="bg-slate-800">Gemini {apiKeys.gemini ? '⚡' : '(Missing)'}</option>
+                <option value="openai" disabled={!apiKeys.openai} className="bg-slate-800">OpenAI {apiKeys.openai ? '⚡' : '(Missing)'}</option>
+                <option value="anthropic" disabled={!apiKeys.anthropic} className="bg-slate-800">Anthropic {apiKeys.anthropic ? '⚡' : '(Missing)'}</option>
+                <option value="deepseek" disabled={!apiKeys.deepseek} className="bg-slate-800">DeepSeek {apiKeys.deepseek ? '⚡' : '(Missing)'}</option>
+                <option value="groq" disabled={!apiKeys.groq} className="bg-slate-800">Groq {apiKeys.groq ? '⚡' : '(Missing)'}</option>
+                <option value="ollama" className="bg-slate-800">Ollama 🏠</option>
+              </select>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 bg-slate-900 border border-white/10 rounded-xl px-3 py-2">
+            {gameMode === 'llm-vs-llm' && (
+              <span className="text-xs text-emerald-400 font-bold pr-2 border-r border-white/10">Player 2</span>
+            )}
+            <BrainCircuit className={`w-4 h-4 ${gameMode === 'llm-vs-llm' ? 'text-emerald-400' : 'text-indigo-400'}`} />
+            <select
+              value={selectedLlm}
+              onChange={handleLlmChange}
+              className="bg-transparent text-xs sm:text-sm text-white font-bold focus:outline-none cursor-pointer hover:text-indigo-400 transition-colors"
+            >
+              <option value="gemini" disabled={!apiKeys.gemini} className="bg-slate-800">Gemini {apiKeys.gemini ? '⚡' : '(Missing)'}</option>
+              <option value="openai" disabled={!apiKeys.openai} className="bg-slate-800">OpenAI {apiKeys.openai ? '⚡' : '(Missing)'}</option>
+              <option value="anthropic" disabled={!apiKeys.anthropic} className="bg-slate-800">Anthropic {apiKeys.anthropic ? '⚡' : '(Missing)'}</option>
+              <option value="deepseek" disabled={!apiKeys.deepseek} className="bg-slate-800">DeepSeek {apiKeys.deepseek ? '⚡' : '(Missing)'}</option>
+              <option value="groq" disabled={!apiKeys.groq} className="bg-slate-800">Groq {apiKeys.groq ? '⚡' : '(Missing)'}</option>
+              <option value="ollama" className="bg-slate-800">Ollama 🏠</option>
+            </select>
+          </div>
+
+          <button
+            onClick={() => {
+              if (window.confirm('Changing game mode will restart the current game. Are you sure?')) {
+                setGameMode(gameMode === 'human-vs-ai' ? 'llm-vs-llm' : 'human-vs-ai');
+                setGameKey(prev => prev + 1);
+              }
+            }}
+            className="px-3 py-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-xs font-bold text-indigo-300 rounded-xl border border-indigo-500/30 transition-colors"
           >
-            <option value="gemini" disabled={!apiKeys.gemini}>Gemini {apiKeys.gemini ? '' : '(Key Missing)'}</option>
-            <option value="openai" disabled={!apiKeys.openai}>OpenAI {apiKeys.openai ? '' : '(Key Missing)'}</option>
-            <option value="anthropic" disabled={!apiKeys.anthropic}>Anthropic {apiKeys.anthropic ? '' : '(Key Missing)'}</option>
-          </select>
+            {gameMode === 'human-vs-ai' ? 'AI vs AI' : 'Human vs AI'}
+          </button>
         </div>
       </div>
 
