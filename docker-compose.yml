@@ -73,3 +73,6 @@ services:
 volumes:
   pgdata:
   letsencrypt:
+networks:
+  playai_network:
+    driver: bridge
