@@ -1,6 +1,30 @@
 version: '3.8'
 
 services:
+  # The Reverse Proxy (Automates Redirection & SSL)
+  traefik:
+    image: traefik:v2.10
+    restart: always
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # SSL Automation (Let's Encrypt)
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=${SSL_EMAIL:-admin@play-ai.in}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      # Global HTTP -> HTTPS Redirect
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    networks:
+      - playai_network
   # The Application
   app:
     build:
@@ -18,6 +42,15 @@ services:
         condition: service_healthy
     networks:
       - playai_network
+    # AUTOMATION LABELS
+    labels:
+      - "traefik.enable=true"
+      # Redirection: Route play-ai.in to this container
+      - "traefik.http.routers.playai.rule=Host(`play-ai.in`)"
+      - "traefik.http.routers.playai.entrypoints=websecure"
+      - "traefik.http.routers.playai.tls.certresolver=myresolver"
+      # Internal Redirection to Port 3000
+      - "traefik.http.services.playai.loadbalancer.server.port=3000"
 
   # The Database
   db:
@@ -36,26 +69,7 @@ services:
       retries: 5
     networks:
       - playai_network
-  # Nginx Proxy Manager (SSL & Reverse Proxy)
-  proxy-manager:
-    image: 'jc21/nginx-proxy-manager:latest'
-    restart: always
-    ports:
-      - '80:80'
-      - '127.0.0.1:81:81'
-      - '443:443'
-    volumes:
-      - ./npm-data:/data
-      - ./npm-letsencrypt:/etc/letsencrypt
-    depends_on:
-      - app
-    networks:
-      - playai_network
-networks:
-  playai_network:
-    driver: bridge
 
 volumes:
   pgdata:
-  npm-data:
-  npm-letsencrypt:
+  letsencrypt:
