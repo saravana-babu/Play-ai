@@ -1,5 +1,5 @@
 # Build Stage
-FROM node:22-alpine AS builder
+FROM node:22-bullseye-slim AS builder
 
 WORKDIR /usr/src/app
 
@@ -7,12 +7,18 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm ci
 
-# Copy source and build frontend
+# Copy source
 COPY . .
+
+# CRITICAL for 512MB RAM: Disable Sourcemaps and limit Node RAM
+# Vite will crash without this on tiny droplets
+ENV NODE_OPTIONS="--max-old-space-size=400"
+ENV GENERATE_SOURCEMAP=false
+
 RUN npm run build
 
 # Final Stage
-FROM node:22-alpine
+FROM node:22-bullseye-slim
 
 WORKDIR /usr/src/app
 
