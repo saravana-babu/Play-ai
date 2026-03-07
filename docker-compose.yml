@@ -7,8 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-playai}
@@ -28,7 +28,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U play-ai" ]
+      test: [ "CMD-SHELL", "pg_isready -U playai" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,7 +38,7 @@ services:
     restart: always
     ports:
       - '80:80'
-      - '81:81'
+      - '127.0.0.1:81:81'
       - '443:443'
     volumes:
       - ./npm-data:/data
