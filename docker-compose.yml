@@ -16,6 +16,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - playai_network
 
   # The Database
   db:
@@ -32,6 +34,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - playai_network
   # Nginx Proxy Manager (SSL & Reverse Proxy)
   proxy-manager:
     image: 'jc21/nginx-proxy-manager:latest'
@@ -45,6 +49,11 @@ services:
       - ./npm-letsencrypt:/etc/letsencrypt
     depends_on:
       - app
+    networks:
+      - playai_network
+networks:
+  playai_network:
+    driver: bridge
 
 volumes:
   pgdata:
