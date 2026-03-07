@@ -68,5 +68,22 @@ export const GAMES: GameMeta[] = [
   { id: 'regexgolf', title: 'RegEx Golf', category: 'Puzzle', description: 'Write the shortest regular expression.', isPlayable: true },
   { id: 'sqlmystery', title: 'SQL Murder Mystery', category: 'Puzzle', description: 'Write SQL queries to find the culprit.', isPlayable: true },
   { id: 'storyteller', title: 'AI Story Teller', category: 'Creative', description: 'Generate epic stories based on Thirukural morals.', isPlayable: true },
-  { id: 'mazesolver', title: 'Maze Master', category: 'Logic', description: 'Navigate through AI-generated labyrinths.', isPlayable: true }
+  { id: 'mazesolver', title: 'Maze Master', category: 'Logic', description: 'Navigate through AI-generated labyrinths.', isPlayable: true },
+
+  // Kids Category (Updated for Dynamic Discovery)
+  { id: 'colormatcher', title: 'Color Matcher', category: 'Kids', description: 'Fun color identification with AI friends.', isPlayable: true },
+  { id: 'animalsounds', title: 'Animal Discovery', category: 'Kids', description: 'Guess the animal from its sound and description.', isPlayable: true },
+  { id: 'emojicounter', title: 'Emoji Count', category: 'Kids', description: 'Count the hidden emojis in the AI forest.', isPlayable: true },
+  { id: 'kidsdiscovery', title: 'Magic Discovery', category: 'Kids', description: 'What do you want to learn about today? AI will guide you!', isPlayable: true },
+  { id: 'logicpuzzles', title: 'Brain Puzzles', category: 'Kids', description: 'Fun logic puzzles generated just for you!', isPlayable: true },
+  { id: 'storybook', title: 'Story Adventure', category: 'Kids', description: 'Co-create a magical story with the AI.', isPlayable: true },
+  { id: 'juniorriddle', title: 'Junior Riddler', category: 'Kids', description: 'Solve funny riddles designed for kids.', isPlayable: true },
+  { id: 'mathfruit', title: 'Math Fruit', category: 'Kids', description: 'Add and subtract delicious fruits!', isPlayable: true },
+  { id: 'wordscramblekids', title: 'Word Scramble Kids', category: 'Kids', description: 'Unscramble names of toys and animals.', isPlayable: true },
+  { id: 'dinofacts', title: 'Dino Explorer', category: 'Kids', description: 'Become a paleontologist with AI dino facts.', isPlayable: true },
+  { id: 'ecohero', title: 'Eco Hero', category: 'Kids', description: 'Protect the planet through smart choices.', isPlayable: true },
+  { id: 'spaceexplorer', title: 'Space Voyager', category: 'Kids', description: 'Travel the solar system and learn about planets.', isPlayable: true },
+  { id: 'magicword', title: 'Magic Word', category: 'Kids', description: 'Guess the magical word with help from an AI wizard.', isPlayable: true },
+  { id: 'grammarguardian', title: 'Grammar Guardian', category: 'Kids', description: 'Help the robot fix its jumbled sentences.', isPlayable: true },
+  { id: 'creativedoodle', title: 'Creative Scene-Maker', category: 'Kids', description: 'Build a beautiful world by making choices.', isPlayable: true }
 ];

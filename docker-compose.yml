@@ -32,6 +32,21 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  # Nginx Proxy Manager (SSL & Reverse Proxy)
+  proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: always
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./npm-data:/data
+      - ./npm-letsencrypt:/etc/letsencrypt
+    depends_on:
+      - app
 
 volumes:
   pgdata:
+  npm-data:
+  npm-letsencrypt:

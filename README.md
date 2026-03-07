@@ -34,7 +34,7 @@ Play-AI is a high-performance, open-source gaming platform featuring 50+ classic
 ### Quick Start
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/Play-AI.git
+   git clone https://github.com/saravana-babu/Play-ai.git
    cd Play-AI
    ```
 2. **Install dependencies:**
@@ -58,17 +58,35 @@ Play-AI is a high-performance, open-source gaming platform featuring 50+ classic
 
 To host on a DigitalOcean Droplet or any VPS:
 
-1. **Install Docker & Docker Compose on your Droplet.**
-2. **Clone the repo on the server:**
+1. **Install Docker & Docker Compose** on your Droplet.
+2. **Clone the repo** on the server:
    ```bash
-   git clone https://github.com/your-username/Play-AI.git
+   git clone https://github.com/saravana-babu/Play-ai.git
    cd Play-AI
    ```
-3. **Build and Run:**
+3. **Run the Deployment Script:**
    ```bash
-   docker compose up -d --build
+   chmod +x deploy.sh
+   ./deploy.sh
    ```
-   The app will be available on port `3000`.
+   *This script will help you set up your `.env` file, generate a secure JWT secret, and start the containers.*
+
+### 🛡️ Nginx Proxy Manager (Easy Free SSL)
+This project includes **Nginx Proxy Manager** (NPM) for a simple web-based SSL management experience.
+
+1. **Access NPM Dashboard:** Open `http://your_droplet_ip:81`
+2. **Login:** `admin@example.com` / `changeme`
+3. **Point Domain:** 
+   - Add a **Proxy Host**.
+   - **Domain:** `play-ai.in`
+   - **Forward Name/IP:** `app`
+   - **Forward Port:** `3000`
+   - **SSL Tab:** Request a new certificate from Let's Encrypt (free).
+
+### 🛡️ Security Best Practices
+- **DB Password:** Never use `postgres` as your password on a public server. Update `DB_PASSWORD` in your `.env` file.
+- **Firewall:** Open ports `80`, `443`, and `81` (temporarily) in your Cloud Firewall. Keep port `5432` (PostgreSQL) closed to the public.
+- **Post-Setup:** After setting up SSL, you can remove port `3000` from the `docker-compose.yml` to ensure all traffic goes through the proxy.
 
 ---
 

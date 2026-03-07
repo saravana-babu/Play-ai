@@ -62,6 +62,16 @@ import TuringMachine from '../games/TuringMachine';
 import AIKnowledge from '../games/AIKnowledge';
 import RegexGolf from '../games/RegexGolf';
 import MazeSolver from '../games/MazeSolver';
+
+// Kids Games
+import KidsColorMatch from '../games/KidsColorMatch';
+import KidsAnimalDiscovery from '../games/KidsAnimalDiscovery';
+import KidsEmojiCount from '../games/KidsEmojiCount';
+import KidsJuniorRiddler from '../games/KidsJuniorRiddler';
+import KidsStoryAdventure from '../games/KidsStoryAdventure';
+import KidsTriviaBundle from '../games/KidsTriviaBundle';
+import KidsLogicBundle from '../games/KidsLogicBundle';
+
 import GenericAIGame from '../games/GenericAIGame';
 import TokenLogViewer from '../components/TokenLogViewer';
 import { ArrowLeft, AlertCircle, BrainCircuit } from 'lucide-react';
@@ -258,6 +268,33 @@ export default function Game() {
         return <AIKnowledge key={gameKey} />;
       case 'regexgolf':
         return <RegexGolf key={gameKey} />;
+
+      // Kids Category Cases
+      case 'colormatcher':
+        return <KidsColorMatch key={gameKey} />;
+      case 'animalsounds':
+        return <KidsAnimalDiscovery key={gameKey} />;
+      case 'emojicounter':
+        return <KidsEmojiCount key={gameKey} />;
+      case 'juniorriddle':
+        return <KidsJuniorRiddler key={gameKey} />;
+      case 'storybook':
+        return <KidsStoryAdventure key={gameKey} />;
+      case 'kidsdiscovery':
+      case 'dinofacts':
+      case 'spaceexplorer':
+      case 'ecohero':
+      case 'mathfruit':
+      case 'letteradventure':
+        return <KidsTriviaBundle key={gameKey} />;
+      case 'logicpuzzles':
+      case 'shapemastery':
+      case 'wordscramblekids':
+      case 'magicword':
+      case 'grammarguardian':
+      case 'creativedoodle':
+        return <KidsLogicBundle key={gameKey} />;
+
       default:
         return <GenericAIGame key={gameKey} />;
     }
