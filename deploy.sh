@@ -1,11 +1,25 @@
 #!/bin/bash
 
 # Play-AI Deployment Script for DigitalOcean Droplets
-# This script automates the setup of environment variables and Docker containers.
+# Optimized for 512MB RAM Droplets
 
 echo "🚀 Starting Play-AI Deployment..."
 
-# 1. Check if .env exists, if not create it from example
+# 1. Local Build Check
+if [ ! -d "dist" ]; then
+    echo "⚠️  'dist' folder NOT found!"
+    echo "💡 On a 512MB RAM Droplet, building inside Docker will often crash (SIGKILL)."
+    echo "✅ RECOMMENDED: Run 'npm run build' on your local computer first, then upload the 'dist' folder."
+    
+    read -p "Try to build anyway? (Not recommended on 512MB RAM) (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "❌ Deployment cancelled. Please upload 'dist' folder and retry."
+        exit 1
+    fi
+fi
+
+# 2. Check if .env exists, if not create it from example
 if [ ! -f .env ]; then
     echo "📄 Creating .env file from .env.example..."
     cp .env.example .env
@@ -15,22 +29,12 @@ if [ ! -f .env ]; then
     sed -i "s/your_super_secret_jwt_key_change_me/$RANDOM_JWT/g" .env
     
     echo "✅ .env created with a fresh JWT_SECRET."
-    echo "⚠️  IMPORTANT: Please edit .env now to set your real DATABASE_URL and DB_PASSWORD if needed."
+    echo "⚠️  IMPORTANT: Please edit .env now to set your real DATABASE_URL."
     echo "   Command: nano .env"
-    
-    read -p "Do you want to edit the .env file now? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        nano .env
-    fi
-else
-    echo "✅ .env file already exists."
 fi
 
-# 2. Pull latest changes (optional if already cloned)
-# git pull origin main
-
 # 3. Build and Start Containers
+# --no-cache is sometimes needed if switching build strategies
 echo "🐳 Building and starting Docker containers..."
 docker-compose up -d --build
 
@@ -39,7 +43,4 @@ echo "🧹 Cleaning up unused Docker images..."
 docker image prune -f
 
 echo "🎉 Deployment Complete!"
-echo "🌐 Your app is currently accessible at http://your_droplet_ip:3000"
-echo "🛠️  Nginx Proxy Manager is running at http://your_droplet_ip:81"
-echo "   (Initial login: admin@example.com / changeme)"
 echo "📊 Run 'docker-compose logs -f' to see real-time logs."

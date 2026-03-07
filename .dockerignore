@@ -1,5 +1,5 @@
 node_modules
-dist
+# dist (Allowing dist for pre-built deployments)
 .env
 .git
 .gitignore
