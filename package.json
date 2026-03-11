@@ -8,7 +8,7 @@
     "build": "vite build",
     "start": "node --import tsx server.ts",
     "preview": "vite preview",
-    "clean": "rm -rf dist",
+    "clean": "if exist dist rmdir /s /q dist",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

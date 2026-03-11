@@ -10,7 +10,9 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Settings from './pages/Settings';
 import Game from './pages/Game';
+import Tool from './pages/Tool';
 import History from './pages/History';
+import Sitemap from './pages/Sitemap';
 
 export default function App() {
   return (
@@ -21,7 +23,9 @@ export default function App() {
           <Route path="login" element={<Login />} />
           <Route path="settings" element={<Settings />} />
           <Route path="games/:id" element={<Game />} />
+          <Route path="tools/:id" element={<Tool />} />
           <Route path="history" element={<History />} />
+          <Route path="sitemap" element={<Sitemap />} />
         </Route>
       </Routes>
     </BrowserRouter>

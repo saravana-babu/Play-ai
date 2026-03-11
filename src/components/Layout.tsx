@@ -58,7 +58,7 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-indigo-500/30">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-50 font-sans selection:bg-indigo-500/30">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -114,7 +114,7 @@ export default function Layout() {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           key={location.pathname}
           initial={{ opacity: 0, y: 10 }}
@@ -125,6 +125,18 @@ export default function Layout() {
           <Outlet />
         </motion.div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 mt-auto bg-slate-950/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-slate-400 font-medium">© 2026 Play-AI.in. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link to="/sitemap" className="text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors">
+              Sitemap / SEO Directory
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

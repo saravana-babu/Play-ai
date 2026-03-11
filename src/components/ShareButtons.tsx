@@ -14,7 +14,12 @@ export default function ShareButtons({ gameTitle, result, penalty, score, onPlay
     const [copied, setCopied] = useState(false);
     const [isHovered, setIsHovered] = useState<string | null>(null);
 
-    const shareText = `🎮 Play-AI.in | ${gameTitle}\n\n🏆 Result: I just ${result}!\n${score ? `📈 Performance: ${score}\n` : ''}${penalty ? `💀 Penalty: "${penalty}"\n` : ''}\nThink you can beat the AI? Challenge it now at ${window.location.origin}`;
+    const isTool = gameTitle.includes('(AI Tool)');
+    const cleanTitle = gameTitle.replace(' (AI Tool)', '');
+
+    const shareText = isTool
+        ? `🔧 Play-AI.in | ${cleanTitle}\n\nI just used this powerful AI tool to supercharge my workflow!\nExplore the 50+ cutting-edge AI tools and games at ${window.location.origin}`
+        : `🎮 Play-AI.in | ${cleanTitle}\n\n🏆 Result: I just ${result}!\n${score ? `📈 Performance: ${score}\n` : ''}${penalty ? `💀 Penalty: "${penalty}"\n` : ''}\nThink you can beat the AI? Challenge it now at ${window.location.origin}`;
 
     const shareOnTwitter = () => {
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
@@ -69,7 +74,7 @@ export default function ShareButtons({ gameTitle, result, penalty, score, onPlay
             <div className="flex flex-col items-center w-full max-w-sm">
                 <div className="flex items-center gap-3 mb-6 w-full">
                     <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-slate-800 to-slate-800" />
-                    <span className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] whitespace-nowrap">Share Victory</span>
+                    <span className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] whitespace-nowrap">{isTool ? 'Share Tool' : 'Share Victory'}</span>
                     <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-slate-800 to-slate-800" />
                 </div>
 
