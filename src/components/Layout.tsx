@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { Brain, LogOut, Settings, User as UserIcon, History, Gamepad2 } from 'lucide-react';
+import { Brain, LogOut, Settings, User as UserIcon, History, Gamepad2, AlertCircle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { fetchApi, removeAuthToken, getAuthToken } from '../lib/api';
 import { motion } from 'motion/react';
@@ -51,6 +51,10 @@ export default function Layout() {
     }
   }, [setUser, setApiKeys, setSelectedLlm, setProviderModel, setOllamaSettings]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   const handleLogout = () => {
     removeAuthToken();
     setUser(null);
@@ -71,6 +75,8 @@ export default function Layout() {
                 Play-AI.in
               </span>
             </Link>
+
+
 
             <div className="flex items-center gap-4">
               {user ? (
@@ -128,12 +134,22 @@ export default function Layout() {
 
       {/* Footer */}
       <footer className="border-t border-white/10 mt-auto bg-slate-950/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-slate-400 font-medium">© 2026 Play-AI.in. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link to="/sitemap" className="text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors">
-              Sitemap / SEO Directory
-            </Link>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+            <div className="space-y-4 text-center sm:text-left">
+              <p className="text-sm text-slate-400 font-medium tracking-tight">© 2026 Play-AI.in. All rights reserved.</p>
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1">
+                <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] flex items-center gap-1.5 underline decoration-slate-800 underline-offset-4">
+                  <AlertCircle className="w-3 h-3 text-rose-500/50" />
+                  Note: Users are solely responsible for their own API costs & billing.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link to="/sitemap" className="text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors">
+                Sitemap / SEO Directory
+              </Link>
+            </div>
           </div>
         </div>
       </footer>

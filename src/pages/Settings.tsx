@@ -162,15 +162,25 @@ export default function Settings() {
                     placeholder={`Enter ${provider} key...`}
                     className="block w-full px-5 py-3 bg-slate-950 border border-white/10 rounded-2xl text-white placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono text-xs"
                   />
+                  <div className="flex justify-end pr-2">
+                    {provider === 'gemini' && <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-[9px] text-indigo-400/60 hover:text-indigo-400 transition-colors font-bold uppercase tracking-tighter underline underline-offset-4">Guide: Create Gemini API Key</a>}
+                    {provider === 'anthropic' && <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="text-[9px] text-orange-400/60 hover:text-orange-400 transition-colors font-bold uppercase tracking-tighter underline underline-offset-4">Guide: Create Claude API Key</a>}
+                    {provider === 'groq' && <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" className="text-[9px] text-rose-400/60 hover:text-rose-400 transition-colors font-bold uppercase tracking-tighter underline underline-offset-4">Guide: Create Groq API Key</a>}
+                    {provider === 'openai' && <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-[9px] text-blue-400/60 hover:text-blue-400 transition-colors font-bold uppercase tracking-tighter underline underline-offset-4">Guide: Create OpenAI API Key</a>}
+                    {provider === 'deepseek' && <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer" className="text-[9px] text-sky-400/60 hover:text-sky-400 transition-colors font-bold uppercase tracking-tighter underline underline-offset-4">Guide: Create DeepSeek API Key</a>}
+                  </div>
                 </div>
               ))}
             </div>
 
             {/* Ollama & Local Infra */}
             <div className="space-y-8">
-              <div className="flex items-center gap-3">
-                <Server className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-white font-black uppercase tracking-widest text-sm italic">Local Infrastructure (Ollama)</h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Server className="w-5 h-5 text-emerald-400" />
+                  <h3 className="text-white font-black uppercase tracking-widest text-sm italic">Local Infrastructure (Ollama)</h3>
+                </div>
+                <a href="https://ollama.com/download" target="_blank" rel="noopener noreferrer" className="text-[10px] font-black text-emerald-400 hover:text-emerald-300 transition-colors uppercase tracking-widest underline underline-offset-4">Download Ollama</a>
               </div>
 
               <div className="bg-slate-950/50 p-8 rounded-[2rem] border border-emerald-500/10 space-y-6">
@@ -253,9 +263,10 @@ export default function Settings() {
         </div>
         <div className="bg-slate-900/50 border border-white/5 rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center space-y-4">
           <Globe className="w-10 h-10 text-slate-700" />
-          <p className="text-xs text-slate-500 leading-relaxed font-bold">
-            All keys are stored locally via `neuroplay-storage`. <br />
-            We never proxy your intelligence through external middle-servers.
+          <p className="text-[10px] text-slate-500 leading-relaxed font-bold uppercase tracking-wider">
+            All keys are stored locally via Secure Storage. <br />
+            API usage costs and billing are the sole responsibility of the user. <br />
+            We never proxy your data through external middle-servers.
           </p>
         </div>
       </div>
