@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Play, Lock, Sparkles, BrainCircuit, ShieldCheck, Zap, Laugh, Cpu, AlertTriangle, Wrench, Search, ChevronDown, Rocket } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Play, Lock, Sparkles, BrainCircuit, ShieldCheck, Zap, Laugh, Cpu, AlertTriangle, Wrench, Search, ChevronDown, Rocket, Send, Code, Monitor, Download, ExternalLink, Info, Globe, Layout } from 'lucide-react';
 import { GAMES } from '../lib/games';
 import { TOOLS } from '../lib/tools';
 import { useStore } from '../store/useStore';
@@ -76,80 +77,101 @@ export default function Home() {
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full" />
 
+        <div className="absolute top-8 right-8 z-20">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 backdrop-blur-md shadow-2xl"
+          >
+            <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400">Powered by</span>
+              <div className="relative h-4 w-24 overflow-hidden">
+                <motion.div
+                  animate={{
+                    y: [0, -16, -32, -48, -64, 0],
+                  }}
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="absolute inset-0 flex flex-col"
+                >
+                  <span className="h-4 flex items-center text-white">Gemini</span>
+                  <span className="h-4 flex items-center text-blue-400">GPT-4o</span>
+                  <span className="h-4 flex items-center text-orange-400">Claude</span>
+                  <span className="h-4 flex items-center text-emerald-400">DeepSeek</span>
+                  <span className="h-4 flex items-center text-rose-400">Groq</span>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
         <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 backdrop-blur-md shadow-2xl"
-            >
-              <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
-              <div className="flex items-center gap-2">
-                <span className="text-slate-400">Powered by</span>
-                <div className="relative h-4 w-24 overflow-hidden">
-                  <motion.div
-                    animate={{
-                      y: [0, -16, -32, -48, -64, 0],
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    className="absolute inset-0 flex flex-col"
-                  >
-                    <span className="h-4 flex items-center text-white">Gemini</span>
-                    <span className="h-4 flex items-center text-blue-400">GPT-4o</span>
-                    <span className="h-4 flex items-center text-orange-400">Claude</span>
-                    <span className="h-4 flex items-center text-emerald-400">DeepSeek</span>
-                    <span className="h-4 flex items-center text-rose-400">Groq</span>
-                  </motion.div>
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-2">
+                <Sparkles className="w-4 h-4 animate-pulse" />
+                Featured Product
+              </div>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-white leading-[1.1] italic uppercase">
+                Play AI <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-emerald-400 to-sky-400">Web Assistant</span>
+              </h1>
+              <p className="text-lg text-slate-300 max-w-xl font-medium leading-relaxed italic">
+                The ultimate AI-powered companion for your browser. Summarize pages, extract insights, and rewrite text instantly across any website using Gemini, OpenAI, or Claude.
+              </p>
+            </div>
+
+            <div className="max-w-4xl space-y-8">
+              <div className="flex flex-wrap gap-4">
+                <a 
+                  href="https://github.com/saravana-babu/Play-ai/tree/main/chrome-extension" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="px-10 py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-2xl shadow-indigo-600/40 group"
+                >
+                  <Download className="w-6 h-6 group-hover:translate-y-1 transition-transform" />
+                  Get Extension
+                </a>
+                <Link
+                  to="/docs"
+                  className="px-8 py-4 bg-white/5 text-white border border-white/10 rounded-[1.2rem] font-black text-[11px] uppercase tracking-widest transition-all hover:bg-white/10 flex items-center gap-2"
+                >
+                  <Info className="w-4 h-4" /> Docs
+                </Link>
+                <button
+                  onClick={() => {
+                    document.getElementById('games-tools')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="px-8 py-4 bg-white/5 text-white border border-white/10 rounded-[1.2rem] font-black text-[11px] uppercase tracking-widest transition-all hover:bg-white/10 flex items-center gap-2"
+                >
+                  <Rocket className="w-4 h-4" /> Apps
+                </button>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-6 pt-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+                    <Zap className="w-3.5 h-3.5" /> Ultra Fast
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium">Native Manifest v3 for maximum speed.</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-amber-400 uppercase tracking-widest">
+                    <ShieldCheck className="w-3.5 h-3.5" /> Private
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium">BYOK local-only key storage.</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                    <Globe className="w-3.5 h-3.5" /> Universal
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium">Works on any website, anywhere.</p>
                 </div>
               </div>
-            </motion.div>
-
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-white leading-[1.1] italic uppercase">
-              The Nexus of <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-emerald-400 to-sky-400">Play & Productivity</span>
-            </h1>
-
-            <p className="text-lg text-slate-400 max-w-xl font-medium leading-relaxed italic">
-              Compete against hyper-intelligent LLMs in 50+ games or accelerate your digital workflow with 50+ premium AI assistants. One platform, infinite intelligence.
-            </p>
-
-            <div className="flex flex-wrap gap-4 pt-4">
-              {!hasAnyKey ? (
-                <Link
-                  to="/settings"
-                  className="px-8 py-4 bg-white text-slate-950 rounded-2xl font-black text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-2xl shadow-white/10"
-                >
-                  <Lock className="w-5 h-5" />
-                  Connect API Key
-                </Link>
-              ) : (
-                <>
-                  <button
-                    onClick={() => {
-                      setViewMode('games');
-                      document.getElementById('games-tools')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl shadow-indigo-600/30 group"
-                  >
-                    <Play className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    Browse Games
-                  </button>
-                  <button
-                    onClick={() => {
-                      setViewMode('tools');
-                      document.getElementById('games-tools')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl shadow-emerald-600/30 group"
-                  >
-                    <Rocket className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                    Browse Tools
-                  </button>
-                </>
-              )}
             </div>
           </div>
 
@@ -160,12 +182,8 @@ export default function Home() {
         </div>
       </section>
 
-
-
       {/* Split Library: Games & Tools */}
       <div id="games-tools" className="space-y-12 scroll-mt-20">
-
-        {/* Toggle Switch optimized for Mobile/Tablet - Now Sticky - Hidden on Desktop */}
         <div className="xl:hidden sticky top-[4.5rem] z-30 py-2 bg-slate-950/50 backdrop-blur-xl -mx-4 px-4 sm:mx-0 sm:px-0">
           <div className="flex p-1.5 bg-slate-900 border border-white/10 rounded-[2rem] max-w-md mx-auto shadow-2xl overflow-hidden relative group">
             <motion.div
@@ -190,10 +208,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Dynamic Grid System */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
-
-          {/* Games Column */}
           <section className={`space-y-8 ${viewMode !== 'games' ? 'hidden xl:block' : 'block'}`}>
             <div className="flex flex-col gap-6">
               <div className="flex items-center gap-4">
@@ -246,7 +261,7 @@ export default function Home() {
                                 e.preventDefault();
                                 if (!user) navigate('/login');
                                 else if (game.requiresAi !== false && !hasAnyKey) navigate('/settings');
-                                else alert('This game is coming soon!');
+                                else toast.error('This game is coming soon!');
                               }
                             }}
                             className={`group block p-6 rounded-3xl border transition-all h-full relative overflow-hidden ${game.isPlayable ? 'bg-slate-900/50 border-white/5 hover:bg-slate-900 hover:border-indigo-500/30' : 'bg-slate-950/50 border-white/[0.02] grayscale opacity-50 cursor-not-allowed'}`}
@@ -268,7 +283,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Tools Column */}
           <section className={`space-y-8 ${viewMode !== 'tools' ? 'hidden xl:block' : 'block'}`}>
             <div className="flex flex-col gap-6">
               <div className="flex items-center gap-4">
@@ -314,14 +328,14 @@ export default function Home() {
                       {toolsInCategory.map((tool, index) => (
                         <motion.div key={tool.id} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
                           <Link
-                            to={(tool.isAvailable && user && (tool.requiresAi === false || hasAnyKey)) ? `/tools/${tool.id}` : '#'}
+                            to={(tool.isAvailable && user && (tool.requiresAi === false || hasAnyKey)) ? (tool.id === 'app-generator' ? '/generator' : `/tools/${tool.id}`) : '#'}
                             onClick={(e) => {
                               const canUse = tool.isAvailable && user && (tool.requiresAi === false || hasAnyKey);
                               if (!canUse) {
                                 e.preventDefault();
                                 if (!user) navigate('/login');
                                 else if (tool.requiresAi !== false && !hasAnyKey) navigate('/settings');
-                                else alert('This tool is coming soon!');
+                                else toast.error('This tool is coming soon!');
                               }
                             }}
                             className={`group block p-6 rounded-3xl border transition-all h-full relative overflow-hidden ${tool.isAvailable ? 'bg-slate-900/50 border-white/5 hover:bg-slate-900 hover:border-emerald-500/30' : 'bg-slate-950/50 border-white/[0.02] grayscale opacity-50 cursor-not-allowed'}`}

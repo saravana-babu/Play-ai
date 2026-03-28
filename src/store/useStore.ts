@@ -19,6 +19,9 @@ export interface ApiKeys {
 export interface User {
   id: string | number;
   email: string;
+  isSubscribed?: boolean;
+  planType?: 'free' | 'basic' | 'advance';
+  generationsCount?: number;
 }
 
 export interface TokenLog {
@@ -52,6 +55,9 @@ interface AppState {
   sessionTokens: number;
   gameSessionTokens: number;
   providerQuotas: ProviderQuota;
+  isSubscribed: boolean;
+  planType: 'free' | 'basic' | 'advance';
+  generationsCount: number;
   setUser: (user: User | null) => void;
   setApiKeys: (keys: Partial<ApiKeys>) => void;
   setProviderModel: (provider: LlmProvider, model: string) => void;
@@ -62,6 +68,9 @@ interface AppState {
   addLog: (log: TokenLog) => void;
   clearLogs: () => void;
   resetSessionTokens: () => void;
+  setGenerationsCount: (count: number) => void;
+  setPlanType: (plan: 'free' | 'basic' | 'advance') => void;
+  setSubscribed: (subscribed: boolean) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -78,7 +87,7 @@ export const useStore = create<AppState>()(
       selectedLlm: 'groq',
       player1Llm: 'groq',
       providerModels: {
-        gemini: 'gemini-1.5-flash',
+        gemini: 'gemini-1.5-flash-002',
         openai: 'gpt-4o-mini',
         anthropic: 'claude-3-5-sonnet-latest',
         deepseek: 'deepseek-chat',
@@ -101,7 +110,15 @@ export const useStore = create<AppState>()(
         groq: 0,
         ollama: 0,
       },
-      setUser: (user) => set({ user }),
+      isSubscribed: false,
+      planType: 'free',
+      generationsCount: 0,
+      setUser: (user) => set({ 
+        user, 
+        isSubscribed: user?.isSubscribed ?? false, 
+        planType: user?.planType ?? 'free',
+        generationsCount: user?.generationsCount ?? 0 
+      }),
       setApiKeys: (keys) => set((state) => ({ apiKeys: { ...state.apiKeys, ...keys } })),
       setProviderModel: (provider, model) => set((state) => ({
         providerModels: { ...state.providerModels, [provider]: model }
@@ -128,6 +145,9 @@ export const useStore = create<AppState>()(
         providerQuotas: { gemini: 0, openai: 0, anthropic: 0, deepseek: 0, groq: 0, ollama: 0 }
       }),
       resetSessionTokens: () => set({ gameSessionTokens: 0 }),
+      setGenerationsCount: (generationsCount) => set({ generationsCount }),
+    setPlanType: (planType) => set({ planType }),
+      setSubscribed: (isSubscribed) => set({ isSubscribed }),
     }),
     {
       name: 'neuroplay-storage',

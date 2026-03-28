@@ -3,11 +3,12 @@ import { useStore, LlmProvider, OllamaSettings, ApiKeys } from '../store/useStor
 import { fetchApi } from '../lib/api';
 import { Key, Save, AlertCircle, CheckCircle2, BrainCircuit, Globe, Server, Settings2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import toast from 'react-hot-toast';
 
 const PROVIDER_MODELS: Record<string, string[]> = {
-  gemini: ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro'],
-  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'],
-  anthropic: ['claude-3-5-sonnet-latest', 'claude-3-opus-20240229', 'claude-3-haiku-20240307'],
+  gemini: ['gemini-1.5-flash-002', 'gemini-1.5-pro-002', 'gemini-2.0-flash-exp'],
+  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4o-2024-08-06'],
+  anthropic: ['claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest', 'claude-3-opus-latest'],
   deepseek: ['deepseek-chat', 'deepseek-coder'],
   groq: ['llama-3.3-70b-versatile', 'llama-3.1-70b-versatile', 'mixtral-8x7b-32768', 'gemma2-9b-it'],
 };
@@ -20,6 +21,8 @@ export default function Settings() {
     providerModels,
     ollamaSettings,
     providerQuotas,
+    isSubscribed,
+    generationsCount,
     setApiKeys,
     setSelectedLlm,
     setProviderModel,
@@ -109,6 +112,63 @@ export default function Settings() {
             <p>{message.text}</p>
           </div>
         )}
+
+        {/* Subscription Status Card */}
+        <div className="mb-12 p-8 rounded-[2.5rem] bg-indigo-500/5 border border-indigo-500/10 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex items-center gap-6">
+            <div className={`p-4 rounded-3xl ${isSubscribed ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-slate-800 border-white/5'} border`}>
+              <CheckCircle2 className={`w-8 h-8 ${isSubscribed ? 'text-emerald-400' : 'text-slate-600'}`} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-black text-white uppercase italic tracking-tight">
+                  {isSubscribed ? 'Premium Access' : 'Free Tier'}
+                </h3>
+                {isSubscribed && (
+                  <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded-lg uppercase tracking-widest border border-emerald-500/20">
+                    Active
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-widest mt-1">
+                {generationsCount} AI Generations used
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            {!isSubscribed ? (
+              <button
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/stripe/create-checkout-session', {
+                      method: 'POST',
+                      headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await response.json();
+                    if (data.url) window.location.href = data.url;
+                  } catch (err: any) {
+                    setMessage({ type: 'error', text: err.message });
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="px-8 py-3 bg-indigo-500 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+              >
+                Upgrade to Premium
+              </button>
+            ) : (
+              <button
+                className="px-8 py-3 bg-white/5 text-slate-400 border border-white/10 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:text-white transition-all"
+                onClick={() => toast.success('Subscription management coming soon!')}
+              >
+                Manage Subscription
+              </button>
+            )}
+          </div>
+        </div>
 
         <form onSubmit={handleSave} className="space-y-12 relative z-10">
           {/* Active Provider Selection */}

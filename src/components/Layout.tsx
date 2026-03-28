@@ -67,14 +67,25 @@ export default function Layout() {
       <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="p-2 bg-indigo-500/20 rounded-xl group-hover:bg-indigo-500/30 transition-colors">
-                <Brain className="w-6 h-6 text-indigo-400" />
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="relative w-10 h-10 flex items-center justify-center bg-slate-900 rounded-xl border border-white/10 group-hover:border-indigo-500/50 transition-all shadow-2xl">
+                <img src="/favicon.svg" alt="Play AI" className="w-6 h-6 group-hover:scale-110 transition-transform" />
               </div>
-              <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                Play-AI.in
-              </span>
+              <div className="flex flex-col -space-y-1">
+                <span className="font-black text-2xl tracking-tighter text-white italic uppercase group-hover:text-indigo-400 transition-colors">
+                  Play AI
+                </span>
+                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em] pl-0.5">
+                  Assistant
+                </span>
+              </div>
             </Link>
+
+            <div className="hidden md:flex items-center gap-8 ml-8">
+              <Link to="/generator" className={`text-xs font-black uppercase tracking-widest transition-all hover:text-indigo-400 ${location.pathname === '/generator' ? 'text-indigo-400' : 'text-slate-400'}`}>
+                App Engine
+              </Link>
+            </div>
 
 
 

@@ -1,27 +1,62 @@
-# 🎮 Play-AI: The Ultimate AI Gaming Hub
+# 🎮 Play AI: The Ultimate Intelligence Hub
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Host: play-ai.in](https://img.shields.io/badge/Hosted-play--ai.in-indigo)](https://play-ai.in)
+[![Platform: Chrome Extension](https://img.shields.io/badge/Browser-Chrome--Extension-emerald)](https://github.com/saravana-babu/Play-ai/tree/main/chrome-extension)
 
-Play-AI is a high-performance, open-source gaming platform featuring 50+ classic and modern games powered by Multiple Large Language Models (LLMs). Challenge the AI, watch LLMs duel each other, or sharpen your skills in an immersive, gaming-optimized environment.
+Play AI is a professional, privacy-focused intelligence ecosystem designed to decentralize AI productivity. We combine a massive library of 50+ AI-driven games and tools with a high-performance **Web Assistant** extension for instant content curation and creation.
 
-**🌐 Live Demo:** [play-ai.in](https://play-ai.in)
+**🚀 Featured: AI PWA App Engine — Generate high-fidelity Landing Pages and PWAs from a single prompt.**
 
 ---
 
-## ✨ Features
+## 🌐 1. Play-AI Website Features
 
-- **50+ Integrated Games:** From classics like Chess and Sudoku to AI-driven experiences like Story Teller and ML Tuning.
-- **Multiple AI Engines:** Integrated support for:
-  - **Google Gemini** (v1.5 Flash/Pro)
-  - **OpenAI GPT-4o**
-  - **Anthropic Claude 3.5**
-  - **DeepSeek**
-  - **Groq** (Ultra-fast Llama 3/Mixtral)
-  - **Ollama** (Local execution support)
-- **Duel Mode:** Match two different LLMs against each other and watch them compete.
-- **Premium UI:** Sleek, dark-themed interface built with React, Tailwind, and Framer Motion.
-- **Infrastructure Ready:** Full-stack architecture with high-speed inference logging and quota management.
+The central hub for deterministic games, cognitive tools, and the AI App Engine.
+
+### ⚡ AI App Engine (PWA Generator)
+- **Instant Deployment:** Generate complete JavaScript-based PWAs, Landing Pages, and Single-file UIs in seconds.
+- **BYOK Sandbox:** Securely use your own API keys (Gemini, OpenAI, Groq) with zero server-side storage.
+- **Code Export:** Download raw `.html` or export your generated code for external hosting.
+
+### 🕹️ Unified Game Nexus
+- **50+ Integrated Modules:** Classic games (Chess, Sudoku) to AI-first experiences like *Story Teller* and *Neural Cipher*.
+- **LLM Duals:** Watch two different LLM providers (e.g., Gemini vs. Claude) compete in real-time strategic duels.
+- **Adaptive Intelligence:** Games that evolve and learn based on your playstyle.
+
+### 🛠️ Cognitive Tool Library
+- **Developer Suite:** AI Code Reviewer, RegEx Compiler, API Mock Generator.
+- **Productivity Suite:** Meeting Notes Extractor, Financial Risk Evaluator, SWOT Analyzer.
+- **Learning Suite:** Interactive Quiz Maker, ELI5 Concept Explainer, Personal Study Plan Gen.
+
+---
+
+## 🧩 2. Play AI Web Assistant (Chrome Extension)
+
+A powerful, high-density side panel that brings the full power of Play AI to any website.
+
+### 🔳 3x3 High-Density Power Grid
+A slim **280px Obsidian UI** featuring 9 specialized intelligence tools at your fingertips:
+- **Curate Intelligence:**
+    - **Summarize**: Zero-clutter webpage summaries.
+    - **Insights**: Extract deep takeaways and data points.
+    - **Analyze**: Evaluate tone, bias, and authority.
+    - **For Kids**: Explain the current page simply for a young child.
+    - **Quiz Me**: Generate test questions based on the page.
+    - **Code Snippet**: Extract and explain technical logic from the page.
+
+- **Create & Command:**
+    - **Rewrite**: Rewrite selected text for clarity or professionalism.
+    - **Action Items**: Extract "To-Do" lists from unstructured text.
+    - **Viral Tweet**: Draft engaging social posts about the current content.
+    - **Pro Email**: Write a professional email summary of the page.
+    - **Interview Prep**: Predict tough questions related to the page content.
+
+### 🚀 Performance & UI
+- **Groq Integration**: Optimized for sub-second inference using Llama 3.3 and Mixtral.
+- **Obsidian Glassmorphism**: Semi-transparent dark UI with a pinned, always-visible Branding Footer.
+- **BYOK Security**: Securely saves API keys locally using `chrome.storage`. No keys ever touch our backend.
+- **Keyboard Shortcut**: Toggle the assistant anywhere using `Alt + Shift + Space`.
 
 ---
 
@@ -29,78 +64,42 @@ Play-AI is a high-performance, open-source gaming platform featuring 50+ classic
 
 ### Prerequisites
 - **Node.js** (v20+)
-- **PostgreSQL** (Optional for local development, fallback to transient state available)
+- **PostgreSQL** (Recommended for full History/Profile support)
 
 ### Quick Start
-1. **Clone the repository:**
+1. **Clone & Install:**
    ```bash
    git clone https://github.com/saravana-babu/Play-ai.git
    cd Play-AI
-   ```
-2. **Install dependencies:**
-   ```bash
    npm install
    ```
-3. **Configure Environment:**
-   Create a `.env` file in the root:
-   ```env
-   DATABASE_URL=postgres://user:pass@localhost:5432/play-ai
-   JWT_SECRET=your_super_secret_key
-   ```
-4. **Launch:**
+2. **Environment Setup:** Create a `.env` with `DATABASE_URL` and `JWT_SECRET`.
+3. **Run Platform:** `npm run dev`
+4. **Build Extension:** 
    ```bash
-   npm run dev
+   cd chrome-extension
+   # Bundles src/ to public/
+   npm run build 
    ```
 
 ---
 
-## 🐳 Docker Deployment (Recommended for Droplets)
+## 🛡️ Security & Privacy (BYOK)
 
-To host on a DigitalOcean Droplet or any VPS:
-
-1. **Install Docker & Docker Compose** on your Droplet.
-2. **Clone the repo** on the server:
-   ```bash
-   git clone https://github.com/saravana-babu/Play-ai.git
-   cd Play-AI
-   ```
-3. **Run the Deployment Script:**
-   ```bash
-   chmod +x deploy.sh
-   ./deploy.sh
-   ```
-   *This script will help you set up your `.env` file, generate a secure JWT secret, and start the containers.*
-
-### 🛡️ Nginx Proxy Manager (Easy Free SSL)
-This project includes **Nginx Proxy Manager** (NPM) for a simple web-based SSL management experience.
-
-1. **Access NPM Dashboard:** Open `http://your_droplet_ip:81`
-2. **Login:** `admin@example.com` / `changeme`
-3. **Point Domain:** 
-   - Add a **Proxy Host**.
-   - **Domain:** `play-ai.in`
-   - **Forward Name/IP:** `app`
-   - **Forward Port:** `3000`
-   - **SSL Tab:** Request a new certificate from Let's Encrypt (free).
-
-### 🛡️ Security Best Practices
-- **DB Password:** Never use `postgres` as your password on a public server. Update `DB_PASSWORD` in your `.env` file.
-- **Firewall:** Open ports `80`, `443`, and `81` (temporarily) in your Cloud Firewall. Keep port `5432` (PostgreSQL) closed to the public.
-- **Post-Setup:** After setting up SSL, you can remove port `3000` from the `docker-compose.yml` to ensure all traffic goes through the proxy.
+Play AI is built on the **Bring Your Own Key** (BYOK) principle. We act as an intelligent gateway, ensuring:
+1. **No Data Snooping:** Your prompts and responses stay between you and your AI provider.
+2. **Local Sovereignty:** API keys are stored in high-security local browser storage, never sent to `play-ai.in`.
+3. **Cost Control:** You are in direct control of your own LLM billing and usage.
 
 ---
 
 ## 🤝 Contributing
-
-We love PRs! Whether it's a new game, a UI tweak, or a new AI provider, feel free to contribute.
-1. Check out our [CONTRIBUTING.md](CONTRIBUTING.md).
-2. Fork the repo and submit your changes.
-3. If your PR is high-quality, it will be merged and deployed to `play-ai.in`.
+We love PRs! Whether it's a new 3x3 tool, a game module, or a new AI adapter.
+1. Fork the repo and check out [CONTRIBUTING.md](CONTRIBUTING.md).
+2. All major PRs are deploy-mirrored to `play-ai.in`.
 
 ---
 
 ## 📜 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-Developed for the future of AI-human interaction.
+MIT License - Developed for the future of AI-human interaction.
+*Powered by [play-ai.in](https://play-ai.in)*

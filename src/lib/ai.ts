@@ -3,7 +3,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { LlmProvider, ApiKeys, useStore } from '../store/useStore';
 
 const getApiKey = (provider: LlmProvider, apiKeys: ApiKeys): string | undefined => {
-  const userKey = apiKeys[provider === 'ollama' ? 'gemini' : provider]?.trim();
+  if (provider === 'ollama') return undefined;
+  const userKey = apiKeys[provider]?.trim();
   if (userKey) return userKey;
 
   if (provider === 'gemini') {
@@ -42,7 +43,7 @@ export const generateNextMove = async (
 
   try {
     if (provider === 'gemini') {
-      const model = modelName || 'gemini-1.5-flash';
+      const model = (modelName === 'gemini-1.5-flash' ? 'gemini-1.5-flash-002' : modelName) || 'gemini-1.5-flash-002';
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
@@ -150,7 +151,7 @@ export const getLlmResponse = async (
 
   try {
     if (provider === 'gemini') {
-      const model = modelName || 'gemini-1.5-flash';
+      const model = (modelName === 'gemini-1.5-flash' ? 'gemini-1.5-flash-002' : modelName) || 'gemini-1.5-flash-002';
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
@@ -163,8 +164,8 @@ export const getLlmResponse = async (
       });
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(`Gemini API Error: ${response.statusText} - ${JSON.stringify(errData)}`);
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(`Gemini API Error: ${response.status} - ${JSON.stringify(errData.error || errData)}`);
       }
       const data = await response.json();
 
@@ -173,7 +174,15 @@ export const getLlmResponse = async (
         logTokens(gameId, provider, usage.promptTokenCount || 0, usage.candidatesTokenCount || 0);
       }
 
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) {
+        if (data.promptFeedback?.blockReason) {
+          throw new Error(`Gemini blocked the request: ${data.promptFeedback.blockReason}`);
+        }
+        throw new Error('Gemini returned no content. Check safety filters or prompt.');
+      }
+
+      return text;
     }
 
     else if (provider === 'openai' || provider === 'deepseek' || provider === 'groq' || provider === 'ollama') {
@@ -253,7 +262,7 @@ export const generateFunnyTask = async (
 
   try {
     if (provider === 'gemini') {
-      const model = modelName || 'gemini-1.5-flash';
+      const model = (modelName === 'gemini-1.5-flash' ? 'gemini-1.5-flash-002' : modelName) || 'gemini-1.5-flash-002';
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {

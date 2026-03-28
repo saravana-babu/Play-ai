@@ -7,6 +7,11 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://play-ai.in/generator</loc>
+    <changefreq>always</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://play-ai.in/tools</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -15,6 +20,11 @@
     <loc>https://play-ai.in/games</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://play-ai.in/settings</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 
   <!-- AI Tools -->

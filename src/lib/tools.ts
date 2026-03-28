@@ -9,6 +9,7 @@ export interface ToolMeta {
 
 export const TOOLS: ToolMeta[] = [
     // AI Data Tools
+    { id: 'app-generator', title: 'AI App Generator', category: 'AI Developer Tools', description: 'Instant generation of Landing Pages, Single-file UIs, and simple PWAs from a single prompt.', isAvailable: true },
     { id: 'data-insight-gen', title: 'Data Insight Gen', category: 'AI Data Tools', description: 'Chat securely with your CSV files and extract advanced quantitative AI data visualizations.', isAvailable: true },
     { id: 'web-scraper', title: 'Smart Scraper', category: 'AI Data Tools', description: 'Intelligently extract and scrape structured data from unstructured websites using AI logic.', isAvailable: true },
     { id: 'json-converter', title: 'Unstructured to JSON', category: 'AI Data Tools', description: 'Clean and convert messy text blocks into strict, readable JSON schemas via AI models.', isAvailable: true },

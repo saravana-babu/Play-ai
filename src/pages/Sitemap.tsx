@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { GAMES } from '../lib/games';
 import { TOOLS } from '../lib/tools';
-import { Map, Gamepad2, Wrench, Home, User, Settings, Shield, ChevronRight, Sparkles, Zap, Brain, Globe, Bot } from 'lucide-react';
+import { Map, Gamepad2, Wrench, Home, User, Settings, Shield, ChevronRight, Sparkles, Zap, Brain, Globe, Bot, Monitor } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function Sitemap() {
@@ -64,9 +64,9 @@ export default function Sitemap() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
                         { to: '/', icon: Home, label: 'Neural Nexus', desc: 'Main entry point and discovery home.', color: 'text-indigo-400' },
-                        { to: '/login', icon: User, label: 'Identity Sync', desc: 'Auth gateways and user credentials.', color: 'text-emerald-400' },
+                        { to: 'https://github.com/saravana-babu/Play-ai/tree/main/chrome-extension', icon: Sparkles, label: 'Web Assistant', desc: 'Flagship Chrome Extension for AI browsing.', color: 'text-sky-400' },
+                        { to: '/docs', icon: Monitor, label: 'Blueprint', desc: 'Installation guide and technical docs.', color: 'text-emerald-400' },
                         { to: '/settings', icon: Settings, label: 'System Params', desc: 'Configure global API vectors and UI.', color: 'text-amber-400' },
-                        { to: '/history', icon: Shield, label: 'Execution Logs', desc: 'Review historical logical outputs.', color: 'text-rose-400' },
                     ].map((link, i) => (
                         <motion.div key={i} whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 400 }}>
                             <Link to={link.to} className="p-8 rounded-[2rem] bg-slate-900 border border-white/5 hover:border-white/20 transition-all group block h-full shadow-lg relative overflow-hidden">
