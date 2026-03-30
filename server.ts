@@ -232,7 +232,7 @@ app.post('/api/generate-game', authenticate, async (req: AuthRequest, res: Respo
     let BACKEND_GEMINI_KEY = process.env.GEMINI_API_KEY;
 
     if (!BACKEND_GEMINI_KEY) {
-      BACKEND_GEMINI_KEY = 'AIzaSyD1jSwUs8uL9EAoyF_iB0oshulfh6UQH8s';
+      BACKEND_GEMINI_KEY = '--provide here----';
       // res.status(500).json({ error: 'Backend AI configuration missing' });
       // return;
     }
@@ -276,7 +276,7 @@ app.post('/api/generate-game', authenticate, async (req: AuthRequest, res: Respo
     // Save to history and increment count
     await pool.query('UPDATE profiles SET generations_count = generations_count + 1 WHERE id = $1', [userId]);
     const insertRes = await pool.query(
-      'INSERT INTO generated_games (user_id, prompt, code) VALUES ($1, $2, $3) RETURNING id', 
+      'INSERT INTO generated_games (user_id, prompt, code) VALUES ($1, $2, $3) RETURNING id',
       [userId, prompt, code]
     );
 
@@ -470,7 +470,7 @@ app.get('/p/:slug', async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
     const gameRes = await pool.query('SELECT code FROM generated_games WHERE share_slug = $1 AND is_published = TRUE', [slug]);
-    
+
     if (gameRes.rows.length === 0) {
       res.status(404).send('<h1>App not found</h1>');
       return;
